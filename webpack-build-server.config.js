@@ -2,6 +2,8 @@ const path = require("path");
 const nodeExternals = require("webpack-node-externals");
 const webpack = require("webpack");
 
+const context = __dirname;
+
 process.traceDeprecation = true; //https://github.com/webpack/loader-utils/issues/56
 
 module.exports = {
@@ -15,9 +17,9 @@ module.exports = {
 		__filename: false
 	},
 
-	context: __dirname,
+	context,
 
-	entry: [path.join(__dirname, "src/lazuli-dashboard")],
+	entry: [path.join(__dirname, "src/server")],
 
 	output: {
 		path: path.join(__dirname, "build/"),
@@ -63,12 +65,13 @@ module.exports = {
 								"react"
 							],
 							plugins: [
+								"relay",
 								[
 									"react-css-modules",
 									{
-										handleMissingStyleName: "throw",
-										//Remove the matching style import. This option is used to enable server-side rendering.
-										removeImport: true,
+										context,
+										webpackHotModuleReloading: true,
+										handleMissingStyleName: "warn",
 										filetypes: {
 											".scss": {
 												syntax: "postcss-scss"
@@ -88,12 +91,7 @@ module.exports = {
 				include: [path.resolve(__dirname, "src")],
 
 				use: [
-					{
-						loader: "style-loader",
-						options: {
-							sourceMap: true
-						}
-					},
+					"isomorphic-style-loader",
 					{
 						loader: "css-loader",
 						options: {
@@ -101,7 +99,8 @@ module.exports = {
 							importLoaders: true,
 							localIdentName: "[path]___[name]__[local]___[hash:base64:5]"
 						}
-					}
+					},
+					"postcss-loader"
 				]
 			},
 			{
@@ -109,12 +108,7 @@ module.exports = {
 				include: [path.resolve(__dirname, "src")],
 
 				use: [
-					{
-						loader: "style-loader",
-						options: {
-							sourceMap: true
-						}
-					},
+					"isomorphic-style-loader",
 					{
 						loader: "css-loader",
 						options: {
@@ -123,12 +117,8 @@ module.exports = {
 							localIdentName: "[path]___[name]__[local]___[hash:base64:5]"
 						}
 					},
-					{
-						loader: "sass-loader",
-						options: {
-							sourceMap: true
-						}
-					}
+					"postcss-loader",
+					"sass-loader"
 				]
 			}
 		]

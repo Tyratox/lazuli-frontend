@@ -1,5 +1,8 @@
 {
 	"KEY_PATH": "./keys/server.key",
 	"CERT_PATH": "./keys/server.crt",
-	"HTTP_PORT": 8080
+	"HTTP_PORT": 8080,
+	"API_URL": "",
+	"CLIENT_ID": 1,
+	"CLIENT_SECRET": ""
 }

@@ -63,6 +63,7 @@ module.exports = {
 								"react"
 							],
 							plugins: [
+								"relay",
 								[
 									"react-css-modules",
 									{
@@ -88,12 +89,7 @@ module.exports = {
 				include: [path.resolve(root, "src/frontend")],
 
 				use: [
-					{
-						loader: "style-loader",
-						options: {
-							sourceMap: true
-						}
-					},
+					"isomorphic-style-loader",
 					{
 						loader: "css-loader",
 						options: {
@@ -101,7 +97,8 @@ module.exports = {
 							importLoaders: true,
 							localIdentName: "[path]___[name]__[local]___[hash:base64:5]"
 						}
-					}
+					},
+					"postcss-loader"
 				]
 			},
 			{
@@ -109,12 +106,7 @@ module.exports = {
 				include: [path.resolve(root, "src/frontend")],
 
 				use: [
-					{
-						loader: "style-loader",
-						options: {
-							sourceMap: true
-						}
-					},
+					"isomorphic-style-loader",
 					{
 						loader: "css-loader",
 						options: {
@@ -123,12 +115,8 @@ module.exports = {
 							localIdentName: "[path]___[name]__[local]___[hash:base64:5]"
 						}
 					},
-					{
-						loader: "sass-loader",
-						options: {
-							sourceMap: true
-						}
-					}
+					"postcss-loader",
+					"sass-loader"
 				]
 			}
 		]

@@ -58,11 +58,13 @@ module.exports = {
 								"react"
 							],
 							plugins: [
+								"relay",
 								[
 									"react-css-modules",
 									{
 										context,
-										handleMissingStyleName: "throw",
+										webpackHotModuleReloading: true,
+										handleMissingStyleName: "warn",
 										filetypes: {
 											".scss": {
 												syntax: "postcss-scss"
@@ -82,12 +84,7 @@ module.exports = {
 				include: [path.resolve(__dirname, "src/frontend")],
 
 				use: [
-					{
-						loader: "style-loader",
-						options: {
-							sourceMap: true
-						}
-					},
+					"isomorphic-style-loader",
 					{
 						loader: "css-loader",
 						options: {
@@ -95,7 +92,8 @@ module.exports = {
 							importLoaders: true,
 							localIdentName: "[path]___[name]__[local]___[hash:base64:5]"
 						}
-					}
+					},
+					"postcss-loader"
 				]
 			},
 			{
@@ -103,12 +101,7 @@ module.exports = {
 				include: [path.resolve(__dirname, "src/frontend")],
 
 				use: [
-					{
-						loader: "style-loader",
-						options: {
-							sourceMap: true
-						}
-					},
+					"isomorphic-style-loader",
 					{
 						loader: "css-loader",
 						options: {
@@ -117,12 +110,8 @@ module.exports = {
 							localIdentName: "[path]___[name]__[local]___[hash:base64:5]"
 						}
 					},
-					{
-						loader: "sass-loader",
-						options: {
-							sourceMap: true
-						}
-					}
+					"postcss-loader",
+					"sass-loader"
 				]
 			}
 		]

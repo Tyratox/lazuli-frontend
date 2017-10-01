@@ -1,9 +1,10 @@
 import React from "react";
+import withStyles from "isomorphic-style-loader/lib/withStyles";
 
-import "./App.scss";
+import styles from "./App.scss";
 
-const App = () => {
+const App = ({ api }) => {
 	return <span styleName="class">hello world</span>;
 };
 
-export default App;
+export default withStyles(styles)(App);
