@@ -1,1 +1,1 @@
-# lazuli-dashboard
+# lazuli-frontend

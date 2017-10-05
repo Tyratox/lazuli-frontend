@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,43 +71,59 @@ module.exports = require("react");
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
-
-module.exports = require("path");
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports) {
-
-module.exports = {"KEY_PATH":"./keys/server.key","CERT_PATH":"./keys/server.crt","HTTP_PORT":8080,"API_URL":"","CLIENT_ID":1,"CLIENT_SECRET":""}
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-module.exports = require("webpack");
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(5);
-
-
-/***/ }),
-/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const http2 = __webpack_require__(6);
-const express = __webpack_require__(7);
-const compression = __webpack_require__(8);
-const promiseRequest = __webpack_require__(9);
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+let counter = 0;
 
-const path = __webpack_require__(1);
-const fs = __webpack_require__(10);
+const genUID = exports.genUID = () => {
+	return "uid-" + counter++;
+};
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+module.exports = {"KEY_PATH":"./keys/server.key","CERT_PATH":"./keys/server.crt","HTTP_PORT":8080,"API_URL":"","CLIENT_ID":1,"CLIENT_SECRET":""}
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+module.exports = require("webpack");
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(6);
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const http2 = __webpack_require__(7);
+const express = __webpack_require__(8);
+const compression = __webpack_require__(9);
+const promiseRequest = __webpack_require__(10);
+
+const path = __webpack_require__(2);
+const fs = __webpack_require__(11);
 
 const {
 	KEY_PATH,
@@ -116,8 +132,8 @@ const {
 	API_URL,
 	CLIENT_ID,
 	CLIENT_SECRET
-} = __webpack_require__(2);
-const page = __webpack_require__(11);
+} = __webpack_require__(3);
+const page = __webpack_require__(12);
 
 const expressServer = express();
 const key = fs.readFileSync(KEY_PATH);
@@ -199,15 +215,15 @@ expressServer.get("/oauth-callback", (request, response) => {
 });
 
 if (process.env.NODE_ENV === "development") {
-	const webpack = __webpack_require__(3);
-	const webpackConfig = __webpack_require__(27);
+	const webpack = __webpack_require__(4);
+	const webpackConfig = __webpack_require__(33);
 	const compiler = webpack(webpackConfig);
 
-	expressServer.use(__webpack_require__(28)(compiler, {
+	expressServer.use(__webpack_require__(34)(compiler, {
 		publicPath: webpackConfig.output.publicPath
 	}));
 
-	expressServer.use(__webpack_require__(29)(compiler));
+	expressServer.use(__webpack_require__(35)(compiler));
 
 	expressServer.get("*", (request, response) => {
 		return renderSite(request, response);
@@ -248,37 +264,37 @@ if (process.env.NODE_ENV === "development") {
 }
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 module.exports = require("spdy");
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = require("compression");
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("request-promise-native");
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -288,23 +304,23 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(12);
+var _propTypes = __webpack_require__(13);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _server = __webpack_require__(13);
+var _server = __webpack_require__(14);
 
 var _server2 = _interopRequireDefault(_server);
 
-var _universalRouter = __webpack_require__(14);
+var _universalRouter = __webpack_require__(15);
 
 var _universalRouter2 = _interopRequireDefault(_universalRouter);
 
-var _Api = __webpack_require__(15);
+var _Api = __webpack_require__(16);
 
 var _Api2 = _interopRequireDefault(_Api);
 
-var _routes = __webpack_require__(18);
+var _routes = __webpack_require__(19);
 
 var _routes2 = _interopRequireDefault(_routes);
 
@@ -370,29 +386,29 @@ module.exports = request => {
 				_react2.default.createElement("script", { src: "/bundle.js" })
 			)
 		)));
-	});
+	}).catch(console.log);
 };
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports) {
-
-module.exports = require("prop-types");
 
 /***/ }),
 /* 13 */
 /***/ (function(module, exports) {
 
-module.exports = require("react-dom/server");
+module.exports = require("prop-types");
 
 /***/ }),
 /* 14 */
 /***/ (function(module, exports) {
 
-module.exports = require("universal-router");
+module.exports = require("react-dom/server");
 
 /***/ }),
 /* 15 */
+/***/ (function(module, exports) {
+
+module.exports = require("universal-router");
+
+/***/ }),
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -404,13 +420,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _isomorphicFetch = __webpack_require__(16);
+var _isomorphicFetch = __webpack_require__(17);
 
 var _isomorphicFetch2 = _interopRequireDefault(_isomorphicFetch);
 
-var _relayRuntime = __webpack_require__(17);
+var _relayRuntime = __webpack_require__(18);
 
-var _config = __webpack_require__(2);
+var _config = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -458,19 +474,19 @@ const create = ({ baseUrl = _config.API_URL, headers = {} }) => {
 exports.default = { create };
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 module.exports = require("isomorphic-fetch");
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = require("relay-runtime");
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -484,7 +500,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _App = __webpack_require__(19);
+var _App = __webpack_require__(20);
 
 var _App2 = _interopRequireDefault(_App);
 
@@ -512,7 +528,7 @@ exports.default = [{
 }];
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -526,13 +542,17 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _withStyles = __webpack_require__(20);
+var _withStyles = __webpack_require__(21);
 
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
-var _App = __webpack_require__(21);
+var _App = __webpack_require__(22);
 
 var _App2 = _interopRequireDefault(_App);
+
+var _Landscape = __webpack_require__(28);
+
+var _Landscape2 = _interopRequireDefault(_Landscape);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -544,27 +564,27 @@ if (false) {
 
 const App = ({ api }) => {
 	return _react2.default.createElement(
-		"span",
-		{ className: "src-frontend-___App__class___3KvVe" },
-		"hello world"
+		"div",
+		null,
+		_react2.default.createElement(_Landscape2.default, null)
 	);
 };
 
 exports.default = (0, _withStyles2.default)(_App2.default)(App);
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports) {
 
 module.exports = require("isomorphic-style-loader/lib/withStyles");
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-    var content = __webpack_require__(22);
-    var insertCss = __webpack_require__(24);
+    var content = __webpack_require__(23);
+    var insertCss = __webpack_require__(25);
 
     if (typeof content === 'string') {
       content = [[module.i, content, '']];
@@ -594,23 +614,23 @@ module.exports = require("isomorphic-style-loader/lib/withStyles");
   
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(23)(undefined);
+exports = module.exports = __webpack_require__(24)(undefined);
 // imports
 
 
 // module
-exports.push([module.i, ".src-frontend-___App__class___3KvVe {\n  color: red; }\n", ""]);
+exports.push([module.i, "html,\nbody {\n  margin: 0;\n  padding: 0; }\n\n.src-frontend-___App__background___1h6Y0 {\n  -webkit-filter: drop-shadow(-1px -1px 2px rgba(0, 0, 0, 0.5));\n          filter: drop-shadow(-1px -1px 2px rgba(0, 0, 0, 0.5)); }\n", ""]);
 
 // exports
 exports.locals = {
-	"class": "src-frontend-___App__class___3KvVe"
+	"background": "src-frontend-___App__background___1h6Y0"
 };
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 /*
@@ -692,17 +712,17 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _stringify = __webpack_require__(25);
+var _stringify = __webpack_require__(26);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _slicedToArray2 = __webpack_require__(26);
+var _slicedToArray2 = __webpack_require__(27);
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
@@ -822,23 +842,459 @@ function insertCss(styles) {
 module.exports = insertCss;
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-runtime/core-js/json/stringify");
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-runtime/helpers/slicedToArray");
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const path = __webpack_require__(1);
-const webpack = __webpack_require__(3);
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _Clock = __webpack_require__(29);
+
+var _Clock2 = _interopRequireDefault(_Clock);
+
+var _Ground = __webpack_require__(30);
+
+var _Ground2 = _interopRequireDefault(_Ground);
+
+var _Sky = __webpack_require__(31);
+
+var _Sky2 = _interopRequireDefault(_Sky);
+
+var _Sun = __webpack_require__(32);
+
+var _Sun2 = _interopRequireDefault(_Sun);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const WIDTH = 100;
+const HEIGHT = 50;
+
+const CIRCLE_X = WIDTH / 2;
+const CIRCLE_Y = HEIGHT;
+const CIRCLE_RADIUS = HEIGHT * 0.9;
+
+const HORIZON_Y = CIRCLE_RADIUS - HEIGHT / 2;
+
+const VIEWPORT_START_RAD = Math.asin(1 - HORIZON_Y / CIRCLE_RADIUS);
+const VIEWPORT_END_RAD = Math.PI - VIEWPORT_START_RAD;
+
+const SUN_HOUR_STEP = (VIEWPORT_START_RAD - VIEWPORT_END_RAD) / 14;
+
+class Landscape extends _react2.default.Component {
+	constructor() {
+		super();
+
+		this.componentDidMount = () => {
+			/*this.updateInterval = setInterval(() => {
+   	const d = new Date();
+   	this.setState({ hours: d.getHours() + d.getMinutes() / 60 });
+   }, 60000);*/
+			this.setState({ hours: 5.5 });
+		};
+
+		this.componentWillUnmount = () => {
+			if (this.updateInterval) {
+				clearInterval(this.updateInterval);
+			}
+		};
+
+		this.calculateSunPosition = hours => {
+			//calculate the sun's position
+			const SUN_POS_RAD = VIEWPORT_START_RAD + SUN_HOUR_STEP + //add one because we don't want the sun directly on the horizon
+			//because the clock isn't 0-12 we have to map the time to the interval 6-18 / 18-6
+			(hours < 6 ? 6 + hours : hours - 6) % 12 * SUN_HOUR_STEP;
+
+			return {
+				x: CIRCLE_X + CIRCLE_RADIUS * Math.cos(Math.PI - SUN_POS_RAD),
+				y: CIRCLE_Y - CIRCLE_RADIUS * Math.sin(Math.PI - SUN_POS_RAD)
+			};
+		};
+
+		const d = new Date();
+		this.state = { hours: d.getHours() * d.getMinutes() / 60 };
+	}
+
+	render() {
+		const { hours } = this.state;
+
+		const day = true || hours >= 6 && hours < 18;
+
+		const { x: SUN_X, y: SUN_Y } = this.calculateSunPosition(hours);
+
+		return _react2.default.createElement(
+			"svg",
+			{
+				viewBox: "0 0 " + WIDTH + " " + HEIGHT,
+				preserveAspectRatio: "xMinYMin"
+			},
+			_react2.default.createElement(_Sky2.default, {
+				x: "0",
+				y: "0",
+				width: WIDTH,
+				height: HEIGHT / 2,
+				day: day,
+				hours: this.state.hours
+			}),
+			_react2.default.createElement(_Clock2.default, {
+				x: CIRCLE_X,
+				y: CIRCLE_Y,
+				radius: CIRCLE_RADIUS,
+				clockSift: day ? 19 : 31,
+				viewportStartRad: VIEWPORT_START_RAD,
+				viewportEndRad: VIEWPORT_END_RAD,
+				day: day
+			}),
+			_react2.default.createElement(_Ground2.default, { x: "0", y: HEIGHT / 2, width: WIDTH, height: HEIGHT / 2 }),
+			_react2.default.createElement(_Sun2.default, { x: SUN_X, y: SUN_Y, day: day })
+		);
+	}
+}
+
+exports.default = Landscape;
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const caluclateScaledCircleCoordinate = ({ x: centerX, y: centerY }, radius, offset) => {
+	return {
+		x: centerX + radius * Math.cos(offset),
+		y: centerY - radius * Math.sin(offset)
+	};
+};
+
+const calculateCoordinateOffsetByDistance = (slope = false, distance) => {
+	const dx = slope ? Math.sqrt(Math.pow(distance, 2) / (Math.pow(slope, 2) + 1)) : 0;
+
+	return {
+		dx,
+		dy: slope ? slope * dx : distance
+	};
+};
+
+const toHour = n => Math.abs(n) % 24;
+
+const Clock = ({
+	x = 50,
+	y = 50,
+	radius = 45,
+	lineLengthOutside = 1.5,
+	lineLengthInside = 0.5,
+	distanceToLabel = 1.5,
+	clockSift = 19,
+	viewportStartRad = 0,
+	viewportEndRad = Math.PI,
+	day = true
+}) => {
+	const lineStep = (Math.PI - 2 * viewportStartRad) / 14;
+	const opacity = day ? "0.2" : "0.05";
+
+	return _react2.default.createElement(
+		"g",
+		null,
+		_react2.default.createElement("circle", {
+			cx: x,
+			cy: y,
+			r: radius,
+			stroke: "#fff",
+			strokeWidth: "0.05",
+			fillOpacity: "0",
+			strokeOpacity: opacity
+		}),
+		[...Array(14)].map((e, i) => {
+			if (i === 0) {
+				return null;
+			}
+
+			const radOffset = viewportStartRad + lineStep * i;
+
+			//calc the coordinates on the circle
+			const { x: refX, y: refY } = caluclateScaledCircleCoordinate({ x, y }, radius, radOffset);
+
+			//then caluclate the slope
+			const slope = refX === x ? false : (refY - y) / (refX - x);
+
+			//then use pythagorean theorem
+			let { dx, dy } = calculateCoordinateOffsetByDistance(slope, lineLengthOutside);
+			let { dx: dx2, dy: dy2 } = calculateCoordinateOffsetByDistance(slope, lineLengthInside);
+			let { dx: dxText, dy: dyText } = calculateCoordinateOffsetByDistance(slope, distanceToLabel);
+
+			if (i >= 7) {
+				dx *= -1;
+				dy *= -1;
+
+				dx2 *= -1;
+				dy2 *= -1;
+
+				dxText *= -1;
+				dyText *= -1;
+			}
+
+			return _react2.default.createElement(
+				"g",
+				{ key: i },
+				_react2.default.createElement("line", {
+					key: i,
+					x1: refX + dx,
+					y1: refY + dy,
+					x2: refX - dx2,
+					y2: refY - dy2,
+					stroke: "#fff",
+					strokeWidth: "0.05",
+					strokeOpacity: opacity
+				}),
+				_react2.default.createElement(
+					"text",
+					{
+						x: refX - dxText,
+						y: refY - dyText,
+						fill: "#fff",
+						fontSize: "1.25",
+						fontFamily: "sans-serif",
+						transform: "rotate(" + (90 - radOffset * (180 / Math.PI)) + ", " + (refX - dxText) + "," + (refY - dyText) + ")",
+						textAnchor: "middle",
+						dominantBaseline: "central",
+						fillOpacity: opacity
+					},
+					toHour(clockSift - i) + ":00"
+				)
+			);
+		})
+	);
+};
+
+exports.default = Clock;
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const GRADIENT_ID = (0, _utilities.genUID)();
+
+const Ground = ({ x = 0, y = 25, width = 100, height = 25 }) => {
+	return _react2.default.createElement(
+		"g",
+		null,
+		_react2.default.createElement(
+			"defs",
+			null,
+			_react2.default.createElement(
+				"linearGradient",
+				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
+				_react2.default.createElement("stop", { stopColor: "#B4ED50", offset: "0%" }),
+				_react2.default.createElement("stop", { stopColor: "#429321", offset: "100%" })
+			)
+		),
+		_react2.default.createElement("rect", {
+			x: x,
+			y: y,
+			width: width,
+			height: height,
+			fill: "url(#" + GRADIENT_ID + ")"
+		})
+	);
+};
+
+exports.default = Ground;
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const GRADIENT_ID = (0, _utilities.genUID)();
+
+const Sky = ({
+	x = 0,
+	y = 0,
+	width = 100,
+	height = 25,
+	minutes = 0,
+	day = true
+}) => {
+	return _react2.default.createElement(
+		"g",
+		null,
+		_react2.default.createElement(
+			"defs",
+			null,
+			day ? minutes < 8 ? _react2.default.createElement(
+				"linearGradient",
+				{ x1: "0%", y1: "0%", x2: "100%", y2: "50%", id: GRADIENT_ID },
+				_react2.default.createElement("stop", { stopColor: "#F9BF3B", offset: "0%" }),
+				_react2.default.createElement("stop", { stopColor: "#2C3E50", offset: "100%" })
+			) : _react2.default.createElement(
+				"linearGradient",
+				{
+					x1: "50%",
+					y1: "0%",
+					x2: "50%",
+					y2: "100%",
+					id: GRADIENT_ID
+				},
+				_react2.default.createElement("stop", { stopColor: "#89C4F4", offset: "0%" }),
+				_react2.default.createElement("stop", { stopColor: "#22A7F0", offset: "100%" })
+			) : _react2.default.createElement(
+				"linearGradient",
+				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
+				_react2.default.createElement("stop", { stopColor: "#2C3E50", offset: "0%" }),
+				_react2.default.createElement("stop", { stopColor: "#34495E", offset: "100%" })
+			)
+		),
+		_react2.default.createElement("rect", {
+			x: x,
+			y: y,
+			width: width,
+			height: height,
+			fill: "url(#" + GRADIENT_ID + ")"
+		})
+	);
+};
+
+exports.default = Sky;
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const GRADIENT_ID = (0, _utilities.genUID)();
+const SHADOW_ID = (0, _utilities.genUID)();
+
+const SHADOW_OFFSET_OUT = (0, _utilities.genUID)();
+const SHADOW_BLUR_OUT = (0, _utilities.genUID)();
+
+const Sun = ({ x = 50, y = 45, radius = 3, day = true }) => {
+	return _react2.default.createElement(
+		"g",
+		null,
+		_react2.default.createElement(
+			"defs",
+			null,
+			day ? _react2.default.createElement(
+				"linearGradient",
+				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
+				_react2.default.createElement("stop", { stopColor: "#FBDA61", offset: "0%" }),
+				_react2.default.createElement("stop", { stopColor: "#F76B1C", offset: "100%" })
+			) : _react2.default.createElement(
+				"linearGradient",
+				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
+				_react2.default.createElement("stop", { stopColor: "#F2F1EF", offset: "0%" }),
+				_react2.default.createElement("stop", { stopColor: "#DADFE1", offset: "100%" })
+			),
+			_react2.default.createElement(
+				"filter",
+				{
+					x: "-5%",
+					y: "-5%",
+					width: "100%",
+					height: "100%",
+					filterUnits: "objectBoundingBox",
+					id: SHADOW_ID
+				},
+				_react2.default.createElement("feOffset", { dx: "0", dy: "2", "in": "SourceAlpha", result: SHADOW_OFFSET_OUT }),
+				_react2.default.createElement("feGaussianBlur", {
+					stdDeviation: "2",
+					"in": SHADOW_OFFSET_OUT,
+					result: SHADOW_BLUR_OUT
+				}),
+				_react2.default.createElement("feColorMatrix", {
+					values: "0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0",
+					type: "matrix",
+					"in": SHADOW_BLUR_OUT
+				})
+			)
+		),
+		_react2.default.createElement("circle", { cx: x, cy: y, r: radius, fill: "url(#" + GRADIENT_ID + ")" })
+	);
+};
+
+exports.default = Sun;
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const path = __webpack_require__(2);
+const webpack = __webpack_require__(4);
 
 process.traceDeprecation = true; //https://github.com/webpack/loader-utils/issues/56
 
@@ -964,13 +1420,13 @@ module.exports = {
 
 
 /***/ }),
-/* 28 */
+/* 34 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-dev-middleware");
 
 /***/ }),
-/* 29 */
+/* 35 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-hot-middleware");

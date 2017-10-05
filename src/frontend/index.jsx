@@ -71,15 +71,7 @@ if (accessToken) {
 
 //If hot reloading is enabled
 if (module.hot) {
-	module.hot.accept("./routes", () => {
-		const newRoutes = require("./routes").default;
-		const newRouter = new Router(newRoutes);
-
-		unlisten();
-		unlisten = history.listen(render.bind(undefined, newRouter));
-
-		render(history.location);
-	});
+	module.hot.accept();
 }
 
 render(router, history.location);
