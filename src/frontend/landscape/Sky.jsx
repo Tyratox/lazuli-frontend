@@ -134,36 +134,6 @@ const Sky = ({ hours = 0, day = true, sunX = 50, sunY = 45 }) => {
 		<g>
 			<defs>
 				{
-					/*day ? (
-					hours < 8 ? (
-						<linearGradient
-							x1={Math.pow(sunX, 7) / 10e5 / SVG_WIDTH + "%"}
-							y1={0}
-							x2="100%"
-							y2="50%"
-							id={GRADIENT_ID}
-						>
-							<stop stopColor="#F9BF3B" offset="0%" />
-							<stop stopColor="#2C3E50" offset="100%" />
-						</linearGradient>
-					) : (
-						<linearGradient
-							x1="50%"
-							y1="0%"
-							x2="50%"
-							y2="100%"
-							id={GRADIENT_ID}
-						>
-							<stop stopColor="#89C4F4" offset="0%" />
-							<stop stopColor="#22A7F0" offset="100%" />
-						</linearGradient>
-					)
-				) : (
-					<linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id={GRADIENT_ID}>
-						<stop stopColor="#2C3E50" offset="0%" />
-						<stop stopColor="#34495E" offset="100%" />
-					</linearGradient>
-				)*/
 					<linearGradient
 						x1={100 * sunX / SVG_WIDTH + "%"}
 						y1="0%"
@@ -174,18 +144,18 @@ const Sky = ({ hours = 0, day = true, sunX = 50, sunY = 45 }) => {
 						<stop
 							stopColor={
 								"#" +
-								gradient.from.r.toString(16) +
-								gradient.from.g.toString(16) +
-								gradient.from.b.toString(16)
+								Object.values(gradient.from)
+									.map(v => v.toString(16))
+									.join("")
 							}
 							offset="0%"
 						/>
 						<stop
 							stopColor={
 								"#" +
-								gradient.to.r.toString(16) +
-								gradient.to.g.toString(16) +
-								gradient.to.b.toString(16)
+								Object.values(gradient.to)
+									.map(v => v.toString(16))
+									.join("")
 							}
 							offset="100%"
 						/>

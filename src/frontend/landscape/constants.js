@@ -41,6 +41,18 @@ export const SKY_X = 0;
 export const SKY_Y = 0;
 
 /*
+ ####  #    # #    # 
+#      #    # ##   # 
+ ####  #    # # #  # 
+     # #    # #  # # 
+#    # #    # #   ## 
+ ####   ####  #    # 
+ */
+
+export const SUN_ANIMATION_DURATION = 1000;
+export const SUN_ANIMATION_STEPS = 200;
+
+/*
  ####  #####   ####  #    # #    # #####  
 #    # #    # #    # #    # ##   # #    # 
 #      #    # #    # #    # # #  # #    # 
@@ -94,6 +106,33 @@ export const calculateSunPosition = hours => {
 	return {
 		x: CLOCK_X + CLOCK_RADIUS * Math.cos(Math.PI - SUN_POS_RAD),
 		y: CLOCK_Y - CLOCK_RADIUS * Math.sin(Math.PI - SUN_POS_RAD)
+	};
+};
+
+export const calculateSunPositionInAnimation = passed => {
+	//calculate the sun's position
+	let sunPosRad = 0;
+	if (passed < SUN_ANIMATION_DURATION / 2) {
+		sunPosRad =
+			passed == 0
+				? 0
+				: VIEWPORT_START_RAD +
+					13 * HOUR_STEP +
+					2 * HOUR_STEP / SUN_ANIMATION_DURATION * passed;
+	} else {
+		sunPosRad =
+			passed == 0
+				? 0
+				: VIEWPORT_START_RAD +
+					2 *
+						HOUR_STEP /
+						SUN_ANIMATION_DURATION *
+						(passed - SUN_ANIMATION_DURATION / 2);
+	}
+
+	return {
+		x: CLOCK_X + CLOCK_RADIUS * Math.cos(Math.PI - sunPosRad),
+		y: CLOCK_Y - CLOCK_RADIUS * Math.sin(Math.PI - sunPosRad)
 	};
 };
 
