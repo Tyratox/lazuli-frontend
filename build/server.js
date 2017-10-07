@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -79,6 +79,221 @@ module.exports = require("react");
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+//define constants here because many of them depend on each other
+
+/*
+ ####  #    #  ####  
+#      #    # #    # 
+ ####  #    # #      
+     # #    # #  ### 
+#    #  #  #  #    # 
+ ####    ##    ####
+ */
+
+const SVG_WIDTH = exports.SVG_WIDTH = 100;
+const SVG_HEIGHT = exports.SVG_HEIGHT = 50;
+
+/*
+ ####  #       ####   ####  #    # 
+#    # #      #    # #    # #   #  
+#      #      #    # #      ####   
+#      #      #    # #      #  #   
+#    # #      #    # #    # #   #  
+ ####  ######  ####   ####  #    # 
+ */
+
+const CLOCK_X = exports.CLOCK_X = SVG_WIDTH / 2;
+const CLOCK_Y = exports.CLOCK_Y = SVG_HEIGHT;
+const CLOCK_RADIUS = exports.CLOCK_RADIUS = SVG_HEIGHT * 0.9;
+const CLOCK_LINE_LENGTH_INSIDE = exports.CLOCK_LINE_LENGTH_INSIDE = 0.5;
+const CLOCK_LINE_LENGTH_OUTSIDE = exports.CLOCK_LINE_LENGTH_OUTSIDE = 1.5;
+const CLOCK_DISTANCE_TO_LABEL = exports.CLOCK_DISTANCE_TO_LABEL = 1.5;
+
+/*
+ ####  #    # #   # 
+#      #   #   # #  
+ ####  ####     #   
+     # #  #     #   
+#    # #   #    #   
+ ####  #    #   # 
+ */
+
+const SKY_X = exports.SKY_X = 0;
+const SKY_Y = exports.SKY_Y = 0;
+
+/*
+ ####  #    # #    # 
+#      #    # ##   # 
+ ####  #    # # #  # 
+     # #    # #  # # 
+#    # #    # #   ## 
+ ####   ####  #    # 
+ */
+
+const SUN_RADIUS = exports.SUN_RADIUS = 3;
+const SUN_ANIMATION_DURATION = exports.SUN_ANIMATION_DURATION = 1000;
+const SUN_ANIMATION_STEPS = exports.SUN_ANIMATION_STEPS = 200;
+
+/*
+ ####  #####   ####  #    # #    # #####  
+#    # #    # #    # #    # ##   # #    # 
+#      #    # #    # #    # # #  # #    # 
+#  ### #####  #    # #    # #  # # #    # 
+#    # #   #  #    # #    # #   ## #    # 
+ ####  #    #  ####   ####  #    # #####
+ */
+
+const GROUND_X = exports.GROUND_X = 0;
+const GROUND_Y = exports.GROUND_Y = SVG_HEIGHT / 2;
+
+const GROUND_WIDTH = exports.GROUND_WIDTH = SVG_WIDTH;
+const GROUND_HEIGHT = exports.GROUND_HEIGHT = SVG_HEIGHT / 2;
+
+/*
+#####  # #    # ###### #####  
+#    # # #    # #      #    # 
+#    # # #    # #####  #    # 
+#####  # #    # #      #####  
+#   #  #  #  #  #      #   #  
+#    # #   ##   ###### #    # 
+*/
+
+const RIVER_WIDTH = exports.RIVER_WIDTH = 1;
+const RIVER_SEGMENTS = exports.RIVER_SEGMENTS = 2;
+const RIVER_MIN_SEGMENT_LENGTH = exports.RIVER_MIN_SEGMENT_LENGTH = 25;
+const RIVER_MAX_SEGMENT_LENGTH = exports.RIVER_MAX_SEGMENT_LENGTH = 40;
+
+/*
+######  ####  #####  ######  ####  ##### 
+#      #    # #    # #      #        #   
+#####  #    # #    # #####   ####    #   
+#      #    # #####  #           #   #   
+#      #    # #   #  #      #    #   #   
+#       ####  #    # ######  ####    # 
+*/
+
+/*
+#    # # ###### #    # #####   ####  #####  ##### 
+#    # # #      #    # #    # #    # #    #   #   
+#    # # #####  #    # #    # #    # #    #   #   
+#    # # #      # ## # #####  #    # #####    #   
+ #  #  # #      ##  ## #      #    # #   #    #   
+  ##   # ###### #    # #       ####  #    #   # 
+  */
+
+const VIEWPORT_START_RAD = exports.VIEWPORT_START_RAD = Math.asin(1 - (CLOCK_RADIUS - GROUND_Y) / CLOCK_RADIUS);
+const VIEWPORT_END_RAD = exports.VIEWPORT_END_RAD = Math.PI - VIEWPORT_START_RAD;
+const VIEWPORT_WIDTH_RAD = exports.VIEWPORT_WIDTH_RAD = VIEWPORT_END_RAD - VIEWPORT_START_RAD;
+
+const HOUR_STEP = exports.HOUR_STEP = VIEWPORT_WIDTH_RAD / 14;
+
+/*
+ ####  #    #   ##   #####   ####  #    #  ####  
+#      #    #  #  #  #    # #    # #    # #      
+ ####  ###### #    # #    # #    # #    #  ####  
+     # #    # ###### #    # #    # # ## #      # 
+#    # #    # #    # #    # #    # ##  ## #    # 
+ ####  #    # #    # #####   ####  #    #  ####
+ */
+
+const DROP_SHADOW_ID = exports.DROP_SHADOW_ID = "landscape-drop-shadow-filter";
+const DROP_SHADOW_X = exports.DROP_SHADOW_X = "-50%";
+const DROP_SHADOW_Y = exports.DROP_SHADOW_Y = "-50%";
+const DROP_SHADOW_WIDTH = exports.DROP_SHADOW_WIDTH = "200%";
+const DROP_SHADOW_HEIGHT = exports.DROP_SHADOW_HEIGHT = "200%";
+
+/*
+###### #    # #    #  ####  ##### #  ####  #    #  ####  
+#      #    # ##   # #    #   #   # #    # ##   # #      
+#####  #    # # #  # #        #   # #    # # #  #  ####  
+#      #    # #  # # #        #   # #    # #  # #      # 
+#      #    # #   ## #    #   #   # #    # #   ## #    # 
+#       ####  #    #  ####    #   #  ####  #    #  ####
+*/
+
+/**
+ * Calculates the suns position based on the current time in hours
+ * @param {Number} hours 
+ * @returns {Object} An object containing the 'x' and 'y' coordinate
+ */
+const calculateSunPosition = exports.calculateSunPosition = hours => {
+	//calculate the sun's position
+	const SUN_POS_RAD = VIEWPORT_START_RAD + HOUR_STEP + //add one because we don't want the sun directly on the horizon
+	//because the clock isn't 0-12 we have to map the time to the interval 6-18 / 18-6
+	(hours < 6 ? 6 + hours : hours - 6) % 12 * HOUR_STEP;
+
+	return {
+		x: CLOCK_X + CLOCK_RADIUS * Math.cos(Math.PI - SUN_POS_RAD),
+		y: CLOCK_Y - CLOCK_RADIUS * Math.sin(Math.PI - SUN_POS_RAD)
+	};
+};
+
+const calculateSunPositionInAnimation = exports.calculateSunPositionInAnimation = passed => {
+	//calculate the sun's position
+	let sunPosRad = 0;
+	if (passed < SUN_ANIMATION_DURATION / 2) {
+		sunPosRad = passed == 0 ? 0 : VIEWPORT_START_RAD + 13 * HOUR_STEP + 2 * HOUR_STEP / SUN_ANIMATION_DURATION * passed;
+	} else {
+		sunPosRad = passed == 0 ? 0 : VIEWPORT_START_RAD + 2 * HOUR_STEP / SUN_ANIMATION_DURATION * (passed - SUN_ANIMATION_DURATION / 2);
+	}
+
+	return {
+		x: CLOCK_X + CLOCK_RADIUS * Math.cos(Math.PI - sunPosRad),
+		y: CLOCK_Y - CLOCK_RADIUS * Math.sin(Math.PI - sunPosRad)
+	};
+};
+
+/**
+ * A simple range check whether it's currently daytime
+ * @param {Number} hours 
+ * @returns {Boolean} Whether it's daytime
+ */
+const isDay = exports.isDay = hours => hours >= 6 && hours < 18;
+
+const generateRandomYCoordinate = () => {
+	return GROUND_Y + RIVER_WIDTH * 1.5 + Math.random() * (GROUND_HEIGHT - RIVER_WIDTH * 1.5); //also add a little margin
+};
+
+const generateRiverCoordinates = exports.generateRiverCoordinates = () => {
+	const riverCoordinates = [];
+	let riverWidth = 0;
+
+	//generate a random starting height
+	const y = generateRandomYCoordinate();
+
+	riverCoordinates.push({ x: -10, y }); //add this one so the line is straight from the beginning
+	riverCoordinates.push({ x: 0, y });
+
+	//generate the edge coordinates and the segment lengths
+	for (let i = 0; i < RIVER_SEGMENTS; i++) {
+		let width = 0,
+		    y = generateRandomYCoordinate(),
+		    offset = Math.random() * (SVG_WIDTH / RIVER_SEGMENTS / 2);
+		if (i === RIVER_SEGMENTS - 1) {
+			//the remaining length
+			width = SVG_WIDTH - riverWidth;
+		} else {
+			width = RIVER_MIN_SEGMENT_LENGTH + Math.random() * (SVG_WIDTH / RIVER_SEGMENTS / 2);
+		}
+		riverCoordinates.push({ x: riverWidth + offset, y });
+		riverCoordinates.push({ x: riverWidth + offset + width, y });
+
+		riverWidth += width + offset;
+	}
+
+	return riverCoordinates;
+};
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
 let counter = 0;
 
 const genUID = exports.genUID = () => {
@@ -86,44 +301,44 @@ const genUID = exports.genUID = () => {
 };
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 module.exports = require("path");
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = {"KEY_PATH":"./keys/server.key","CERT_PATH":"./keys/server.crt","HTTP_PORT":8080,"API_URL":"","CLIENT_ID":1,"CLIENT_SECRET":""}
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack");
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(6);
+module.exports = __webpack_require__(7);
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const http2 = __webpack_require__(7);
-const express = __webpack_require__(8);
-const compression = __webpack_require__(9);
-const promiseRequest = __webpack_require__(10);
+const http2 = __webpack_require__(8);
+const express = __webpack_require__(9);
+const compression = __webpack_require__(10);
+const promiseRequest = __webpack_require__(11);
 
-const path = __webpack_require__(2);
-const fs = __webpack_require__(11);
+const path = __webpack_require__(3);
+const fs = __webpack_require__(12);
 
 const {
 	KEY_PATH,
@@ -132,8 +347,8 @@ const {
 	API_URL,
 	CLIENT_ID,
 	CLIENT_SECRET
-} = __webpack_require__(3);
-const page = __webpack_require__(12);
+} = __webpack_require__(4);
+const page = __webpack_require__(13);
 
 const expressServer = express();
 const key = fs.readFileSync(KEY_PATH);
@@ -215,15 +430,15 @@ expressServer.get("/oauth-callback", (request, response) => {
 });
 
 if (process.env.NODE_ENV === "development") {
-	const webpack = __webpack_require__(4);
-	const webpackConfig = __webpack_require__(33);
+	const webpack = __webpack_require__(5);
+	const webpackConfig = __webpack_require__(37);
 	const compiler = webpack(webpackConfig);
 
-	expressServer.use(__webpack_require__(34)(compiler, {
+	expressServer.use(__webpack_require__(38)(compiler, {
 		publicPath: webpackConfig.output.publicPath
 	}));
 
-	expressServer.use(__webpack_require__(35)(compiler));
+	expressServer.use(__webpack_require__(39)(compiler));
 
 	expressServer.get("*", (request, response) => {
 		return renderSite(request, response);
@@ -264,37 +479,37 @@ if (process.env.NODE_ENV === "development") {
 }
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 module.exports = require("spdy");
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("compression");
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = require("request-promise-native");
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -304,23 +519,23 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(13);
+var _propTypes = __webpack_require__(14);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _server = __webpack_require__(14);
+var _server = __webpack_require__(15);
 
 var _server2 = _interopRequireDefault(_server);
 
-var _universalRouter = __webpack_require__(15);
+var _universalRouter = __webpack_require__(16);
 
 var _universalRouter2 = _interopRequireDefault(_universalRouter);
 
-var _Api = __webpack_require__(16);
+var _Api = __webpack_require__(17);
 
 var _Api2 = _interopRequireDefault(_Api);
 
-var _routes = __webpack_require__(19);
+var _routes = __webpack_require__(20);
 
 var _routes2 = _interopRequireDefault(_routes);
 
@@ -390,25 +605,25 @@ module.exports = request => {
 };
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 module.exports = require("prop-types");
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 module.exports = require("react-dom/server");
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = require("universal-router");
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -420,13 +635,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _isomorphicFetch = __webpack_require__(17);
+var _isomorphicFetch = __webpack_require__(18);
 
 var _isomorphicFetch2 = _interopRequireDefault(_isomorphicFetch);
 
-var _relayRuntime = __webpack_require__(18);
+var _relayRuntime = __webpack_require__(19);
 
-var _config = __webpack_require__(3);
+var _config = __webpack_require__(4);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -474,19 +689,19 @@ const create = ({ baseUrl = _config.API_URL, headers = {} }) => {
 exports.default = { create };
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = require("isomorphic-fetch");
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("relay-runtime");
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -500,7 +715,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _App = __webpack_require__(20);
+var _App = __webpack_require__(21);
 
 var _App2 = _interopRequireDefault(_App);
 
@@ -528,7 +743,7 @@ exports.default = [{
 }];
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -542,15 +757,15 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _withStyles = __webpack_require__(21);
+var _withStyles = __webpack_require__(22);
 
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
-var _App = __webpack_require__(22);
+var _App = __webpack_require__(23);
 
 var _App2 = _interopRequireDefault(_App);
 
-var _Landscape = __webpack_require__(28);
+var _Landscape = __webpack_require__(29);
 
 var _Landscape2 = _interopRequireDefault(_Landscape);
 
@@ -573,18 +788,18 @@ const App = ({ api }) => {
 exports.default = (0, _withStyles2.default)(_App2.default)(App);
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports) {
 
 module.exports = require("isomorphic-style-loader/lib/withStyles");
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-    var content = __webpack_require__(23);
-    var insertCss = __webpack_require__(25);
+    var content = __webpack_require__(24);
+    var insertCss = __webpack_require__(26);
 
     if (typeof content === 'string') {
       content = [[module.i, content, '']];
@@ -614,10 +829,10 @@ module.exports = require("isomorphic-style-loader/lib/withStyles");
   
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(24)(undefined);
+exports = module.exports = __webpack_require__(25)(undefined);
 // imports
 
 
@@ -630,7 +845,7 @@ exports.locals = {
 };
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports) {
 
 /*
@@ -712,17 +927,17 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _stringify = __webpack_require__(26);
+var _stringify = __webpack_require__(27);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _slicedToArray2 = __webpack_require__(27);
+var _slicedToArray2 = __webpack_require__(28);
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
@@ -842,135 +1057,16 @@ function insertCss(styles) {
 module.exports = insertCss;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-runtime/core-js/json/stringify");
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-runtime/helpers/slicedToArray");
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _Clock = __webpack_require__(29);
-
-var _Clock2 = _interopRequireDefault(_Clock);
-
-var _Ground = __webpack_require__(30);
-
-var _Ground2 = _interopRequireDefault(_Ground);
-
-var _Sky = __webpack_require__(31);
-
-var _Sky2 = _interopRequireDefault(_Sky);
-
-var _Sun = __webpack_require__(32);
-
-var _Sun2 = _interopRequireDefault(_Sun);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const WIDTH = 100;
-const HEIGHT = 50;
-
-const CIRCLE_X = WIDTH / 2;
-const CIRCLE_Y = HEIGHT;
-const CIRCLE_RADIUS = HEIGHT * 0.9;
-
-const HORIZON_Y = CIRCLE_RADIUS - HEIGHT / 2;
-
-const VIEWPORT_START_RAD = Math.asin(1 - HORIZON_Y / CIRCLE_RADIUS);
-const VIEWPORT_END_RAD = Math.PI - VIEWPORT_START_RAD;
-
-const SUN_HOUR_STEP = (VIEWPORT_START_RAD - VIEWPORT_END_RAD) / 14;
-
-class Landscape extends _react2.default.Component {
-	constructor() {
-		super();
-
-		this.componentDidMount = () => {
-			/*this.updateInterval = setInterval(() => {
-   	const d = new Date();
-   	this.setState({ hours: d.getHours() + d.getMinutes() / 60 });
-   }, 60000);*/
-			this.setState({ hours: 5.5 });
-		};
-
-		this.componentWillUnmount = () => {
-			if (this.updateInterval) {
-				clearInterval(this.updateInterval);
-			}
-		};
-
-		this.calculateSunPosition = hours => {
-			//calculate the sun's position
-			const SUN_POS_RAD = VIEWPORT_START_RAD + SUN_HOUR_STEP + //add one because we don't want the sun directly on the horizon
-			//because the clock isn't 0-12 we have to map the time to the interval 6-18 / 18-6
-			(hours < 6 ? 6 + hours : hours - 6) % 12 * SUN_HOUR_STEP;
-
-			return {
-				x: CIRCLE_X + CIRCLE_RADIUS * Math.cos(Math.PI - SUN_POS_RAD),
-				y: CIRCLE_Y - CIRCLE_RADIUS * Math.sin(Math.PI - SUN_POS_RAD)
-			};
-		};
-
-		const d = new Date();
-		this.state = { hours: d.getHours() * d.getMinutes() / 60 };
-	}
-
-	render() {
-		const { hours } = this.state;
-
-		const day = true || hours >= 6 && hours < 18;
-
-		const { x: SUN_X, y: SUN_Y } = this.calculateSunPosition(hours);
-
-		return _react2.default.createElement(
-			"svg",
-			{
-				viewBox: "0 0 " + WIDTH + " " + HEIGHT,
-				preserveAspectRatio: "xMinYMin"
-			},
-			_react2.default.createElement(_Sky2.default, {
-				x: "0",
-				y: "0",
-				width: WIDTH,
-				height: HEIGHT / 2,
-				day: day,
-				hours: this.state.hours
-			}),
-			_react2.default.createElement(_Clock2.default, {
-				x: CIRCLE_X,
-				y: CIRCLE_Y,
-				radius: CIRCLE_RADIUS,
-				clockSift: day ? 19 : 31,
-				viewportStartRad: VIEWPORT_START_RAD,
-				viewportEndRad: VIEWPORT_END_RAD,
-				day: day
-			}),
-			_react2.default.createElement(_Ground2.default, { x: "0", y: HEIGHT / 2, width: WIDTH, height: HEIGHT / 2 }),
-			_react2.default.createElement(_Sun2.default, { x: SUN_X, y: SUN_Y, day: day })
-		);
-	}
-}
-
-exports.default = Landscape;
 
 /***/ }),
 /* 29 */
@@ -987,7 +1083,127 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(1);
+var _Clock = __webpack_require__(30);
+
+var _Clock2 = _interopRequireDefault(_Clock);
+
+var _Ground = __webpack_require__(31);
+
+var _Ground2 = _interopRequireDefault(_Ground);
+
+var _Sky = __webpack_require__(34);
+
+var _Sky2 = _interopRequireDefault(_Sky);
+
+var _Sun = __webpack_require__(35);
+
+var _Sun2 = _interopRequireDefault(_Sun);
+
+var _DropShadowFilter = __webpack_require__(36);
+
+var _DropShadowFilter2 = _interopRequireDefault(_DropShadowFilter);
+
+var _constants = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Landscape extends _react2.default.Component {
+	constructor() {
+		super();
+
+		_initialiseProps.call(this);
+
+		const d = new Date();
+		this.state = { hours: d.getHours() + d.getMinutes() / 60 };
+	}
+
+	render() {
+		const { hours, overrideSunX, overrideSunY } = this.state;
+
+		const day = (0, _constants.isDay)(hours);
+
+		const { x: SUN_X, y: SUN_Y } = (0, _constants.calculateSunPosition)(hours);
+
+		return _react2.default.createElement(
+			"svg",
+			{
+				viewBox: "0 0 " + _constants.SVG_WIDTH + " " + _constants.SVG_HEIGHT,
+				preserveAspectRatio: "xMinYMin"
+			},
+			_react2.default.createElement(
+				"defs",
+				null,
+				_react2.default.createElement(_DropShadowFilter2.default, null)
+			),
+			_react2.default.createElement(_Sky2.default, { day: day, hours: this.state.hours, sunX: SUN_X, sunY: SUN_Y }),
+			_react2.default.createElement(_Clock2.default, { clockSift: day ? 19 : 31, day: day }),
+			_react2.default.createElement(_Sun2.default, {
+				x: overrideSunX ? overrideSunX : SUN_X,
+				y: overrideSunY ? overrideSunY : SUN_Y,
+				day: day
+			}),
+			_react2.default.createElement(_Ground2.default, null)
+		);
+	}
+}
+
+var _initialiseProps = function () {
+	this.animateSun = (passed = 0) => {
+		if (passed >= _constants.SUN_ANIMATION_DURATION) {
+			clearTimeout(this.morning);
+			this.setState({ overrideSunX: undefined, overrideSunY: undefined });
+			return;
+		}
+		const { x, y } = (0, _constants.calculateSunPositionInAnimation)(passed);
+		this.setState({ overrideSunX: x, overrideSunY: y });
+
+		this.morning = setTimeout(() => {
+			this.animateSun(passed + _constants.SUN_ANIMATION_DURATION / _constants.SUN_ANIMATION_STEPS);
+		}, _constants.SUN_ANIMATION_DURATION / _constants.SUN_ANIMATION_STEPS);
+	};
+
+	this.componentDidMount = () => {
+		/*this.updateInterval = setInterval(() => {
+  	const d = new Date();
+  	this.setState({ hours: d.getHours() + d.getMinutes() / 60 });
+  }, 60000);*/
+		this.updateInterval = setInterval(() => {
+			const d = new Date();
+			let hours = d.getMinutes() % 24 + d.getSeconds() / 60 + 8.5;
+			if (this.state.hours < 6 && hours >= 6 || this.state.hours < 18 && hours >= 18) {
+				this.animateSun();
+			}
+			this.setState({ hours });
+		}, 1000);
+	};
+
+	this.componentWillUnmount = () => {
+		if (this.updateInterval) {
+			clearInterval(this.updateInterval);
+		}
+	};
+};
+
+exports.default = Landscape;
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(2);
+
+var _constants = __webpack_require__(1);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1009,28 +1225,16 @@ const calculateCoordinateOffsetByDistance = (slope = false, distance) => {
 
 const toHour = n => Math.abs(n) % 24;
 
-const Clock = ({
-	x = 50,
-	y = 50,
-	radius = 45,
-	lineLengthOutside = 1.5,
-	lineLengthInside = 0.5,
-	distanceToLabel = 1.5,
-	clockSift = 19,
-	viewportStartRad = 0,
-	viewportEndRad = Math.PI,
-	day = true
-}) => {
-	const lineStep = (Math.PI - 2 * viewportStartRad) / 14;
-	const opacity = day ? "0.2" : "0.05";
+const Clock = ({ clockSift = 19, day = true }) => {
+	const opacity = day ? "0.2" : "0.1";
 
 	return _react2.default.createElement(
 		"g",
-		null,
+		{ className: "clock" },
 		_react2.default.createElement("circle", {
-			cx: x,
-			cy: y,
-			r: radius,
+			cx: _constants.CLOCK_X,
+			cy: _constants.CLOCK_Y,
+			r: _constants.CLOCK_RADIUS,
 			stroke: "#fff",
 			strokeWidth: "0.05",
 			fillOpacity: "0",
@@ -1041,18 +1245,17 @@ const Clock = ({
 				return null;
 			}
 
-			const radOffset = viewportStartRad + lineStep * i;
-
+			const radOffset = _constants.VIEWPORT_START_RAD + _constants.HOUR_STEP * i;
 			//calc the coordinates on the circle
-			const { x: refX, y: refY } = caluclateScaledCircleCoordinate({ x, y }, radius, radOffset);
+			const { x: refX, y: refY } = caluclateScaledCircleCoordinate({ x: _constants.CLOCK_X, y: _constants.CLOCK_Y }, _constants.CLOCK_RADIUS, radOffset);
 
 			//then caluclate the slope
-			const slope = refX === x ? false : (refY - y) / (refX - x);
+			const slope = refX === _constants.CLOCK_X ? false : (refY - _constants.CLOCK_Y) / (refX - _constants.CLOCK_X);
 
 			//then use pythagorean theorem
-			let { dx, dy } = calculateCoordinateOffsetByDistance(slope, lineLengthOutside);
-			let { dx: dx2, dy: dy2 } = calculateCoordinateOffsetByDistance(slope, lineLengthInside);
-			let { dx: dxText, dy: dyText } = calculateCoordinateOffsetByDistance(slope, distanceToLabel);
+			let { dx, dy } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_LINE_LENGTH_OUTSIDE);
+			let { dx: dx2, dy: dy2 } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_LINE_LENGTH_INSIDE);
+			let { dx: dxText, dy: dyText } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_DISTANCE_TO_LABEL);
 
 			if (i >= 7) {
 				dx *= -1;
@@ -1101,53 +1304,6 @@ const Clock = ({
 exports.default = Clock;
 
 /***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _utilities = __webpack_require__(1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const GRADIENT_ID = (0, _utilities.genUID)();
-
-const Ground = ({ x = 0, y = 25, width = 100, height = 25 }) => {
-	return _react2.default.createElement(
-		"g",
-		null,
-		_react2.default.createElement(
-			"defs",
-			null,
-			_react2.default.createElement(
-				"linearGradient",
-				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
-				_react2.default.createElement("stop", { stopColor: "#B4ED50", offset: "0%" }),
-				_react2.default.createElement("stop", { stopColor: "#429321", offset: "100%" })
-			)
-		),
-		_react2.default.createElement("rect", {
-			x: x,
-			y: y,
-			width: width,
-			height: height,
-			fill: "url(#" + GRADIENT_ID + ")"
-		})
-	);
-};
-
-exports.default = Ground;
-
-/***/ }),
 /* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1162,60 +1318,69 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(1);
+var _utilities = __webpack_require__(2);
+
+var _constants = __webpack_require__(1);
+
+var _River = __webpack_require__(32);
+
+var _River2 = _interopRequireDefault(_River);
+
+var _Forest = __webpack_require__(33);
+
+var _Forest2 = _interopRequireDefault(_Forest);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const riverCoordinates = (0, _constants.generateRiverCoordinates)();
 const GRADIENT_ID = (0, _utilities.genUID)();
 
-const Sky = ({
-	x = 0,
-	y = 0,
-	width = 100,
-	height = 25,
-	minutes = 0,
-	day = true
-}) => {
+const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
+	//we know the line doesn't start/end in the trees
+	for (let i = 0; i < riverCoordinates.length; i++) {}
+};
+
+let trees = 5;
+const treeCoordinates = [];
+for (let i = 0; i < trees; i++) {
+	let x, y;
+	while (!x || !y /*|| intersectsRiver({ x, y }, riverCoordinates)*/) {
+		x = Math.random() * _constants.GROUND_WIDTH;
+		y = _constants.GROUND_Y + Math.random() * _constants.GROUND_HEIGHT - 10;
+	}
+	treeCoordinates.push({
+		x,
+		y
+	});
+}
+
+const Ground = () => {
 	return _react2.default.createElement(
 		"g",
-		null,
+		{ className: "ground" },
 		_react2.default.createElement(
 			"defs",
 			null,
-			day ? minutes < 8 ? _react2.default.createElement(
-				"linearGradient",
-				{ x1: "0%", y1: "0%", x2: "100%", y2: "50%", id: GRADIENT_ID },
-				_react2.default.createElement("stop", { stopColor: "#F9BF3B", offset: "0%" }),
-				_react2.default.createElement("stop", { stopColor: "#2C3E50", offset: "100%" })
-			) : _react2.default.createElement(
-				"linearGradient",
-				{
-					x1: "50%",
-					y1: "0%",
-					x2: "50%",
-					y2: "100%",
-					id: GRADIENT_ID
-				},
-				_react2.default.createElement("stop", { stopColor: "#89C4F4", offset: "0%" }),
-				_react2.default.createElement("stop", { stopColor: "#22A7F0", offset: "100%" })
-			) : _react2.default.createElement(
+			_react2.default.createElement(
 				"linearGradient",
 				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
-				_react2.default.createElement("stop", { stopColor: "#2C3E50", offset: "0%" }),
-				_react2.default.createElement("stop", { stopColor: "#34495E", offset: "100%" })
+				_react2.default.createElement("stop", { stopColor: "#B4ED50", offset: "0%" }),
+				_react2.default.createElement("stop", { stopColor: "#429321", offset: "100%" })
 			)
 		),
 		_react2.default.createElement("rect", {
-			x: x,
-			y: y,
-			width: width,
-			height: height,
+			x: _constants.GROUND_X,
+			y: _constants.GROUND_Y,
+			width: _constants.GROUND_WIDTH,
+			height: _constants.GROUND_HEIGHT,
 			fill: "url(#" + GRADIENT_ID + ")"
-		})
+		}),
+		_react2.default.createElement(_River2.default, { coordinates: riverCoordinates }),
+		_react2.default.createElement(_Forest2.default, { coordinates: treeCoordinates })
 	);
 };
 
-exports.default = Sky;
+exports.default = Ground;
 
 /***/ }),
 /* 32 */
@@ -1232,7 +1397,388 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(1);
+var _utilities = __webpack_require__(2);
+
+var _constants = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const GRADIENT_ID = (0, _utilities.genUID)();
+
+const River = ({ coordinates }) => {
+	return _react2.default.createElement(
+		"g",
+		{ className: "river" },
+		_react2.default.createElement("polyline", {
+			id: "Path-4",
+			points: coordinates.map(obj => obj.x + " " + obj.y).join(" "),
+			stroke: "#4990E2",
+			fillOpacity: "0",
+			strokeWidth: _constants.RIVER_WIDTH
+		})
+	);
+};
+
+exports.default = River;
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(2);
+
+var _constants = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const LEAF_GRADIENT_ID = (0, _utilities.genUID)();
+const TRUNK_GRADIENT_ID = (0, _utilities.genUID)();
+
+const Trunk = ({ x, y, width, height }) => {
+	return _react2.default.createElement("rect", {
+		fill: "url(#" + TRUNK_GRADIENT_ID + ")",
+		x: x,
+		y: y,
+		width: width,
+		height: height
+	});
+};
+
+const OvalTree = ({ x, y }) => {
+	//Everything in the g element is positioned relative to the current transformation matrix
+	return _react2.default.createElement(
+		"g",
+		{
+			className: "oval",
+			transform: "translate(" + x + "," + y + ")",
+			filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+		},
+		_react2.default.createElement(Trunk, { x: "1.25", y: "4", width: "1", height: "4" }),
+		_react2.default.createElement("path", {
+			d: "M1.78684211,6.15263158 C2.42778309,6.15263158 3.5,5.56742335 3.5,3.86842105 C3.5,2.16941876 2.42778309,0 1.78684211,0 C1.14590112,0 0,2.16941876 0,3.86842105 C0,5.56742335 1.14590112,6.15263158 1.78684211,6.15263158 Z",
+			fill: "url(#" + LEAF_GRADIENT_ID + ")"
+		})
+	);
+};
+
+const AngularTree = ({ x, y }) => {
+	//Everything in the g element is positioned relative to the current transformation matrix
+	return _react2.default.createElement(
+		"g",
+		{
+			className: "angular",
+			transform: "translate(" + x + "," + y + ")",
+			filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+		},
+		_react2.default.createElement(Trunk, { x: "1.5", y: "4", width: "1", height: "4" }),
+		_react2.default.createElement("polygon", {
+			fill: "url(#" + LEAF_GRADIENT_ID + ")",
+			points: "1.09090909 5.81818182 2.90909091 5.81818182 4 3.63636364 2 0 0 3.63636364"
+		})
+	);
+};
+
+const Fir = ({ x, y }) => {
+	//Everything in the g element is positioned relative to the current transformation matrix
+	return _react2.default.createElement(
+		"g",
+		{
+			className: "fir",
+			transform: "translate(" + x + "," + y + ")",
+			filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+		},
+		_react2.default.createElement(Trunk, { x: "1.5", y: "4", width: "1", height: "4" }),
+		_react2.default.createElement("polygon", {
+			fill: "url(#" + LEAF_GRADIENT_ID + ")",
+			points: "0 5.63636364 4 5.63636364 2.90909091 2.72727273 3.81818182 2.72727273 2 0 0.181818182 2.72727273 1.09090909 2.72727273"
+		})
+	);
+};
+
+class Forest extends _react2.default.Component {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.shouldComponentUpdate = () => false, _temp;
+	}
+
+	render() {
+		const { coordinates, treeType = "mixed" } = this.props;
+
+		return _react2.default.createElement(
+			"g",
+			{ className: "forest" },
+			_react2.default.createElement(
+				"defs",
+				null,
+				_react2.default.createElement(
+					"linearGradient",
+					{
+						x1: "0%",
+						y1: "50%",
+						x2: "100%",
+						y2: "50%",
+						id: LEAF_GRADIENT_ID
+					},
+					_react2.default.createElement("stop", { stopColor: "#8CBE50", offset: "0%" }),
+					_react2.default.createElement("stop", { stopColor: "#78A050", offset: "100%" })
+				),
+				_react2.default.createElement(
+					"linearGradient",
+					{
+						x1: "0%",
+						y1: "50%",
+						x2: "100%",
+						y2: "50%",
+						id: TRUNK_GRADIENT_ID
+					},
+					_react2.default.createElement("stop", { stopColor: "#C37850", offset: "0%" }),
+					_react2.default.createElement("stop", { stopColor: "#F39C12", offset: "100%" })
+				)
+			),
+			coordinates.map(({ x, y }, index) => {
+				let type = treeType;
+				if (type === "mixed") {
+					const rnd = Math.random();
+					if (rnd < 1 / 3) {
+						type = OvalTree;
+					} else if (rnd < 2 / 3) {
+						type = AngularTree;
+					} else {
+						type = Fir;
+					}
+				}
+
+				return _react2.default.createElement(type, { key: index, x, y });
+			})
+		);
+	}
+}
+
+exports.default = Forest;
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(2);
+
+var _constants = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const GRADIENT_ID = (0, _utilities.genUID)();
+
+const STOPS = {
+	day: {
+		6: {
+			from: {
+				r: 240,
+				g: 191,
+				b: 59
+			},
+			to: {
+				r: 44,
+				g: 62,
+				b: 80
+			}
+		},
+		10: {
+			from: {
+				r: 137,
+				g: 196,
+				b: 244
+			},
+			to: {
+				r: 34,
+				g: 167,
+				b: 240
+			}
+		},
+		12: {
+			from: {
+				r: 137,
+				g: 196,
+				b: 244
+			},
+			to: {
+				r: 34,
+				g: 167,
+				b: 240
+			}
+		},
+		18: {
+			from: {
+				r: 249,
+				g: 105,
+				b: 14
+			},
+			to: {
+				r: 249,
+				g: 191,
+				b: 59
+			}
+		}
+	},
+	night: {
+		18: {
+			from: {
+				r: 44,
+				g: 62,
+				b: 80
+			},
+			to: {
+				r: 52,
+				g: 73,
+				b: 94
+			}
+		},
+		0: {
+			from: {
+				r: 44,
+				g: 62,
+				b: 80
+			},
+			to: {
+				r: 52,
+				g: 73,
+				b: 94
+			}
+		},
+		6: {
+			from: {
+				r: 44,
+				g: 62,
+				b: 80
+			},
+			to: {
+				r: 52,
+				g: 73,
+				b: 94
+			}
+		}
+	}
+};
+
+const Sky = ({ hours = 0, day = true, sunX = 50, sunY = 45 }) => {
+	const stops = day ? STOPS.day : STOPS.night;
+	let stopKeys = Object.keys(stops).map(k => Number.parseFloat(k));
+	let searchHours = day ? hours : hours < 18 ? hours + 24 : hours;
+
+	let first, second;
+
+	if (day) {
+		stopKeys = stopKeys.sort((a, b) => {
+			return a - b;
+		});
+	} else {
+		stopKeys = stopKeys.map(n => n < 18 ? n + 24 : n).sort((a, b) => {
+			return a - b;
+		});
+	}
+
+	for (let i = 0; i < stopKeys.length; i++) {
+		if (stopKeys[i] === searchHours) {
+			second = stopKeys[i];
+			first = stopKeys[i];
+			break;
+		} else if (stopKeys[i] > searchHours) {
+			second = stopKeys[i];
+			first = stopKeys[i - 1];
+
+			break;
+		} else if (i === stopKeys.length - 1) {
+			//if nothing was found
+		}
+	}
+
+	first = first >= 24 ? first - 24 : first;
+	second = second >= 24 ? second - 24 : second;
+
+	const progress = second == first ? 0 : (hours - first) / (second - first);
+	let gradient = { from: {}, to: {} };
+	["r", "g", "b"].forEach(colorKey => {
+		gradient.from[colorKey] = Math.round(stops[first].from[colorKey] * (1 - progress) + stops[second].from[colorKey] * progress);
+		gradient.to[colorKey] = Math.round(stops[first].to[colorKey] * (1 - progress) + stops[second].to[colorKey] * progress);
+	});
+
+	return _react2.default.createElement(
+		"g",
+		{ className: "sky" },
+		_react2.default.createElement(
+			"defs",
+			null,
+			_react2.default.createElement(
+				"linearGradient",
+				{
+					x1: 100 * sunX / _constants.SVG_WIDTH + "%",
+					y1: "0%",
+					x2: "50%",
+					y2: "100%",
+					id: GRADIENT_ID
+				},
+				_react2.default.createElement("stop", {
+					stopColor: "#" + Object.values(gradient.from).map(v => v.toString(16)).join(""),
+					offset: "0%"
+				}),
+				_react2.default.createElement("stop", {
+					stopColor: "#" + Object.values(gradient.to).map(v => v.toString(16)).join(""),
+					offset: "100%"
+				})
+			)
+		),
+		_react2.default.createElement("rect", {
+			x: _constants.SKY_X,
+			y: _constants.SKY_Y,
+			width: _constants.SVG_WIDTH,
+			height: _constants.SVG_HEIGHT,
+			fill: "url(#" + GRADIENT_ID + ")"
+		})
+	);
+};
+
+exports.default = Sky;
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(2);
+
+var _constants = __webpack_require__(1);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1242,10 +1788,10 @@ const SHADOW_ID = (0, _utilities.genUID)();
 const SHADOW_OFFSET_OUT = (0, _utilities.genUID)();
 const SHADOW_BLUR_OUT = (0, _utilities.genUID)();
 
-const Sun = ({ x = 50, y = 45, radius = 3, day = true }) => {
+const Sun = ({ x = 50, y = 45, day = true }) => {
 	return _react2.default.createElement(
 		"g",
-		null,
+		{ className: "sun", filter: "url(#" + _constants.DROP_SHADOW_ID + ")" },
 		_react2.default.createElement(
 			"defs",
 			null,
@@ -1283,18 +1829,77 @@ const Sun = ({ x = 50, y = 45, radius = 3, day = true }) => {
 				})
 			)
 		),
-		_react2.default.createElement("circle", { cx: x, cy: y, r: radius, fill: "url(#" + GRADIENT_ID + ")" })
+		_react2.default.createElement("circle", { cx: x, cy: y, r: _constants.SUN_RADIUS, fill: "url(#" + GRADIENT_ID + ")" })
 	);
 };
 
 exports.default = Sun;
 
 /***/ }),
-/* 33 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const path = __webpack_require__(2);
-const webpack = __webpack_require__(4);
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(2);
+
+var _constants = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const OFFSET_OUT = (0, _utilities.genUID)();
+const BLUR_OUT = (0, _utilities.genUID)();
+const MATRIX_OUT = (0, _utilities.genUID)();
+
+const DropShadowFilter = ({ dx = 0.05, dy = 0.1, deviation = 0.05 }) => {
+	return _react2.default.createElement(
+		"filter",
+		{
+			x: _constants.DROP_SHADOW_X,
+			y: _constants.DROP_SHADOW_Y,
+			width: _constants.DROP_SHADOW_WIDTH,
+			height: _constants.DROP_SHADOW_HEIGHT,
+			filterUnits: "objectBoundingBox",
+			id: _constants.DROP_SHADOW_ID
+		},
+		_react2.default.createElement("feOffset", { dx: dx, dy: dy, "in": "SourceGraphic", result: OFFSET_OUT }),
+		_react2.default.createElement("feGaussianBlur", {
+			stdDeviation: deviation,
+			"in": OFFSET_OUT,
+			result: BLUR_OUT
+		}),
+		_react2.default.createElement("feColorMatrix", {
+			values: "0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.4 0",
+			type: "matrix",
+			"in": BLUR_OUT,
+			result: MATRIX_OUT
+		}),
+		_react2.default.createElement(
+			"feMerge",
+			null,
+			_react2.default.createElement("feMergeNode", { "in": MATRIX_OUT }),
+			_react2.default.createElement("feMergeNode", { "in": "SourceGraphic" })
+		)
+	);
+};
+
+exports.default = DropShadowFilter;
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const path = __webpack_require__(3);
+const webpack = __webpack_require__(5);
 
 process.traceDeprecation = true; //https://github.com/webpack/loader-utils/issues/56
 
@@ -1420,13 +2025,13 @@ module.exports = {
 
 
 /***/ }),
-/* 34 */
+/* 38 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-dev-middleware");
 
 /***/ }),
-/* 35 */
+/* 39 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-hot-middleware");

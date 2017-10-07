@@ -5,6 +5,8 @@ import Ground from "./Ground";
 import Sky from "./Sky";
 import Sun from "./Sun";
 
+import DropShadowFilter from "./helpers/DropShadowFilter";
+
 import {
 	SVG_WIDTH,
 	SVG_HEIGHT,
@@ -13,9 +15,9 @@ import {
 	calculateSunPosition,
 	calculateSunPositionInAnimation,
 	isDay
-} from "./constants.js";
+} from "./helpers/constants.js";
 
-class Landscape extends React.Component {
+class Landscape extends React.PureComponent {
 	constructor() {
 		super();
 
@@ -40,11 +42,12 @@ class Landscape extends React.Component {
 	componentDidMount = () => {
 		/*this.updateInterval = setInterval(() => {
 			const d = new Date();
-			this.setState({ hours: d.getHours() + d.getMinutes() / 60 });
-		}, 60000);*/
+			this.setState({ hours: d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600 });
+		}, 30000);*/
 		this.updateInterval = setInterval(() => {
 			const d = new Date();
-			let hours = d.getMinutes() % 24 + d.getSeconds() / 60 + 8.5;
+			let hours =
+				d.getMinutes() % 24 + d.getSeconds() / 60 + d.getMilliseconds() / 60000;
 			if (
 				(this.state.hours < 6 && hours >= 6) ||
 				(this.state.hours < 18 && hours >= 18)
@@ -52,7 +55,7 @@ class Landscape extends React.Component {
 				this.animateSun();
 			}
 			this.setState({ hours });
-		}, 1000);
+		}, 100);
 	};
 
 	componentWillUnmount = () => {
@@ -73,6 +76,9 @@ class Landscape extends React.Component {
 				viewBox={"0 0 " + SVG_WIDTH + " " + SVG_HEIGHT}
 				preserveAspectRatio="xMinYMin"
 			>
+				<defs>
+					<DropShadowFilter />
+				</defs>
 				<Sky day={day} hours={this.state.hours} sunX={SUN_X} sunY={SUN_Y} />
 				<Clock clockSift={day ? 19 : 31} day={day} />
 				<Sun
