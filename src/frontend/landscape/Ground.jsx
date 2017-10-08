@@ -13,22 +13,25 @@ import {
 } from "./helpers/constants";
 
 import River from "./River";
-import Plants from "./Plants";
+import GroundDecoration from "./GroundDecoration";
 
 const GRADIENT_ID = genUID();
 
 class Ground extends React.PureComponent {
 	render = () => {
 		const {
-			plantCount = 10,
+			decorationCount = 10,
 			riverCoordinates = generateRiverCoordinates(),
-			treeCoordinates: treeCoords
+			decorationCoordinates: decCoords
 		} = this.props;
 
-		let treeCoordinates = [];
+		let decorationCoordinates = [];
 
-		if (!treeCoords) {
-			treeCoordinates = generatePlantCoordinates(riverCoordinates);
+		if (!decCoords) {
+			decorationCoordinates = generatePlantCoordinates(
+				decorationCount,
+				riverCoordinates
+			);
 		}
 
 		return (
@@ -47,7 +50,7 @@ class Ground extends React.PureComponent {
 					fill={"url(#" + GRADIENT_ID + ")"}
 				/>
 				<River coordinates={riverCoordinates} />
-				<Plants coordinates={generatePlantCoordinates(plantCount)} />
+				<GroundDecoration coordinates={decorationCoordinates} />
 			</g>
 		);
 	};

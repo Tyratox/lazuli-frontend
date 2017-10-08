@@ -91,7 +91,7 @@ class Fir extends React.PureComponent {
 	};
 }
 
-class Forest extends React.PureComponent {
+class GroundDecoration extends React.PureComponent {
 	render = () => {
 		const { coordinates, treeType = "mixed" } = this.props;
 
@@ -143,4 +143,4 @@ class Forest extends React.PureComponent {
 	};
 }
 
-export default Forest;
+export default GroundDecoration;

@@ -393,12 +393,12 @@ const rotatePoint = (
 		y: yOrigin
 	}
 ) => {
-	//first get the angle of the point
-	const currentAngle = Math.atan(y / x);
+	let s = Math.sin(angle),
+		c = Math.cos(angle);
 
 	return {
-		x: Math.cos(currentAngle + angle),
-		y: Math.sin(currentAngle + angle)
+		x: (x - xOrigin) * c - (y - yOrigin) * s + xOrigin,
+		y: (x - xOrigin) * s + (y - yOrigin) * c + yOrigin
 	};
 };
 
@@ -415,10 +415,11 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 			//this is the closest segment
 			//first perform a low cost test
 			if (
-				x < riverCoordinates[i].x - RIVER_WIDTH / 2 ||
-				x > riverCoordinates[i + 1].y + RIVER_WIDTH / 2 ||
-				y < riverCoordinates[i].y - RIVER_WIDTH / 2 ||
-				y > riverCoordinates[i + 1].y + RIVER_WIDTH / 2
+				riverCoordinates[i].y < riverCoordinates[i + 1].y
+					? y < riverCoordinates[i].y - RIVER_WIDTH ||
+						y > riverCoordinates[i + 1].y + RIVER_WIDTH
+					: y > riverCoordinates[i].y + RIVER_WIDTH ||
+						y < riverCoordinates[i + 1].y - RIVER_WIDTH
 			) {
 				return false;
 			}
@@ -429,12 +430,13 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 				(riverCoordinates[i].y - riverCoordinates[i + 1].y) /
 					(riverCoordinates[i].x - riverCoordinates[i + 1].x)
 			);
+			window.rotate = rotatePoint;
 			//now we have to rotate two points of the rectangle and the trunk coordinate back
-			const trunkCoordinate = rotatePoint({ x, y }, -angle, { x: 0, y: 0 });
+			const coordinate = rotatePoint({ x, y }, -angle, { x: 0, y: 0 });
 			const rectPoint1 = rotatePoint(
 				{
 					x: riverCoordinates[i].x,
-					y: riverCoordinates[i].y - RIVER_WIDTH
+					y: riverCoordinates[i].y
 				},
 				-angle,
 				{ x: 0, y: 0 }
@@ -442,7 +444,7 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 			const rectPoint2 = rotatePoint(
 				{
 					x: riverCoordinates[i + 1].x,
-					y: riverCoordinates[i + 1].y + RIVER_WIDTH
+					y: riverCoordinates[i + 1].y
 				},
 				-angle,
 				{ x: 0, y: 0 }
@@ -452,17 +454,17 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 			if (angle > 0) {
 				//rectPoint2.y > rectPoint1.y
 				return (
-					trunkCoordinate.x >= rectPoint1.x &&
-					trunkCoordinate.y <= rectPoint2.x &&
-					trunkCoordinate.y >= rectPoint1.y &&
-					trunkCoordinate.y <= rectPoint2.y
+					coordinate.x >= rectPoint1.x - RIVER_WIDTH &&
+					coordinate.x <= rectPoint2.x + RIVER_WIDTH &&
+					coordinate.y >= rectPoint1.y - RIVER_WIDTH &&
+					coordinate.y <= rectPoint2.y + RIVER_WIDTH
 				);
 			} else {
 				return (
-					trunkCoordinate.x >= rectPoint1.x &&
-					trunkCoordinate.y <= rectPoint2.x &&
-					trunkCoordinate.y <= rectPoint1.y &&
-					trunkCoordinate.y >= rectPoint2.y
+					coordinate.x >= rectPoint1.x - RIVER_WIDTH &&
+					coordinate.x <= rectPoint2.x + RIVER_WIDTH &&
+					coordinate.y <= rectPoint1.y + RIVER_WIDTH &&
+					coordinate.y >= rectPoint2.y - RIVER_WIDTH
 				);
 			}
 		}
@@ -472,13 +474,13 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 
 /**
  * Generates random tree coordinates while checking for river intersection
- * @param {Number} trees The amount of coordinates to generate
+ * @param {Number} count The amount of coordinates to generate
  * @param {Array} riverCoordinates The river segment coordinates
  * @returns {Array} An array containing objects with an 'x' and 'y' value 
  */
-export const generatePlantCoordinates = (trees = 0, riverCoordinates = []) => {
+export const generatePlantCoordinates = (count = 0, riverCoordinates = []) => {
 	const treeCoordinates = [];
-	for (let i = 0; i < trees; i++) {
+	for (let i = 0; i < count; i++) {
 		let x, y;
 		while (!x || !y || intersectsRiver({ x, y }, riverCoordinates)) {
 			x = Math.random() * GROUND_WIDTH;

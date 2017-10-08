@@ -120,6 +120,143 @@ const CLOCK_DISTANCE_TO_LABEL = exports.CLOCK_DISTANCE_TO_LABEL = 1.5;
 
 const SKY_X = exports.SKY_X = 0;
 const SKY_Y = exports.SKY_Y = 0;
+const SKY_GRADIENT_STOPS = exports.SKY_GRADIENT_STOPS = {
+	day: {
+		6: {
+			from: {
+				r: 240,
+				g: 191,
+				b: 59
+			},
+			to: {
+				r: 44,
+				g: 62,
+				b: 80
+			}
+		},
+		10: {
+			from: {
+				r: 137,
+				g: 196,
+				b: 244
+			},
+			to: {
+				r: 34,
+				g: 167,
+				b: 240
+			}
+		},
+		12: {
+			from: {
+				r: 137,
+				g: 196,
+				b: 244
+			},
+			to: {
+				r: 34,
+				g: 167,
+				b: 240
+			}
+		},
+		18: {
+			from: {
+				r: 249,
+				g: 105,
+				b: 14
+			},
+			to: {
+				r: 249,
+				g: 191,
+				b: 59
+			}
+		}
+	},
+	night: {
+		18: {
+			from: {
+				r: 44,
+				g: 62,
+				b: 80
+			},
+			to: {
+				r: 52,
+				g: 73,
+				b: 94
+			}
+		},
+		0: {
+			from: {
+				r: 44,
+				g: 62,
+				b: 80
+			},
+			to: {
+				r: 52,
+				g: 73,
+				b: 94
+			}
+		},
+		6: {
+			from: {
+				r: 44,
+				g: 62,
+				b: 80
+			},
+			to: {
+				r: 52,
+				g: 73,
+				b: 94
+			}
+		}
+	}
+};
+
+const calculateSkyGradient = exports.calculateSkyGradient = (hours = 0, day = true) => {
+	const stops = day ? SKY_GRADIENT_STOPS.day : SKY_GRADIENT_STOPS.night;
+
+	let stopKeys = Object.keys(stops).map(k => Number.parseFloat(k));
+	let searchHours = day ? hours : hours < 18 ? hours + 24 : hours;
+
+	let first, second;
+
+	if (day) {
+		stopKeys = stopKeys.sort((a, b) => {
+			return a - b;
+		});
+	} else {
+		stopKeys = stopKeys.map(n => n < 18 ? n + 24 : n).sort((a, b) => {
+			return a - b;
+		});
+	}
+
+	for (let i = 0; i < stopKeys.length; i++) {
+		if (stopKeys[i] === searchHours) {
+			second = stopKeys[i];
+			first = stopKeys[i];
+			break;
+		} else if (stopKeys[i] > searchHours) {
+			second = stopKeys[i];
+			first = stopKeys[i - 1];
+
+			break;
+		} else if (i === stopKeys.length - 1) {
+			//if nothing was found
+			throw new Error("@devs: Fix the stops object for hour " + hours + "! No key in [" + stopKeys.join(",") + "] was bigger than " + searchHours + ". Apparently it is currently " + (day ? "day" : "night") + "time");
+		}
+	}
+
+	first = first >= 24 ? first - 24 : first;
+	second = second >= 24 ? second - 24 : second;
+
+	const progress = second == first ? 0 : (hours - first) / (second - first);
+	let gradient = { from: {}, to: {} };
+	["r", "g", "b"].forEach(colorKey => {
+		gradient.from[colorKey] = Math.round(stops[first].from[colorKey] * (1 - progress) + stops[second].from[colorKey] * progress);
+		gradient.to[colorKey] = Math.round(stops[first].to[colorKey] * (1 - progress) + stops[second].to[colorKey] * progress);
+	});
+
+	return gradient;
+};
 
 /*
  ####  #    # #    # 
@@ -162,15 +299,6 @@ const RIVER_WIDTH = exports.RIVER_WIDTH = 1;
 const RIVER_SEGMENTS = exports.RIVER_SEGMENTS = 2;
 const RIVER_MIN_SEGMENT_LENGTH = exports.RIVER_MIN_SEGMENT_LENGTH = 25;
 const RIVER_MAX_SEGMENT_LENGTH = exports.RIVER_MAX_SEGMENT_LENGTH = 40;
-
-/*
-######  ####  #####  ######  ####  ##### 
-#      #    # #    # #      #        #   
-#####  #    # #    # #####   ####    #   
-#      #    # #####  #           #   #   
-#      #    # #   #  #      #    #   #   
-#       ####  #    # ######  ####    # 
-*/
 
 /*
 #    # # ###### #    # #####   ####  #####  ##### 
@@ -250,16 +378,24 @@ const calculateSunPositionInAnimation = exports.calculateSunPositionInAnimation 
  */
 const isDay = exports.isDay = hours => hours >= 6 && hours < 18;
 
-const generateRandomYCoordinate = () => {
+/**
+ * Generates a random y coordinate for a river segment
+ * @returns {Number} The y coordinate
+ */
+const generateRandomRiverSegmentYCoordinate = () => {
 	return GROUND_Y + RIVER_WIDTH * 1.5 + Math.random() * (GROUND_HEIGHT - RIVER_WIDTH * 1.5); //also add a little margin
 };
 
+/**
+ * Generates random river coordinates
+ * @returns {Array} An array containing objects with 'x' and 'y' values
+ */
 const generateRiverCoordinates = exports.generateRiverCoordinates = () => {
 	const riverCoordinates = [];
 	let riverWidth = 0;
 
 	//generate a random starting height
-	const y = generateRandomYCoordinate();
+	const y = generateRandomRiverSegmentYCoordinate();
 
 	riverCoordinates.push({ x: -10, y }); //add this one so the line is straight from the beginning
 	riverCoordinates.push({ x: 0, y });
@@ -267,7 +403,7 @@ const generateRiverCoordinates = exports.generateRiverCoordinates = () => {
 	//generate the edge coordinates and the segment lengths
 	for (let i = 0; i < RIVER_SEGMENTS; i++) {
 		let width = 0,
-		    y = generateRandomYCoordinate(),
+		    y = generateRandomRiverSegmentYCoordinate(),
 		    offset = Math.random() * (SVG_WIDTH / RIVER_SEGMENTS / 2);
 		if (i === RIVER_SEGMENTS - 1) {
 			//the remaining length
@@ -282,6 +418,93 @@ const generateRiverCoordinates = exports.generateRiverCoordinates = () => {
 	}
 
 	return riverCoordinates;
+};
+
+/**
+ * Rotates a point in 2d space around the origin
+ * @param {Object} point The point to rotate. An object with an 'x' and 'y' value 
+ * @param {*} angle The angle to rotate
+ * @param {*} origin The origin to rotate the point around. An object with an 'x' and 'y' value
+ * @returns {Object} The rotated point. An object with an 'x' and 'y' value 
+ */
+const rotatePoint = ({ x, y }, angle = 0, {
+	x: xOrigin,
+
+	y: yOrigin
+}) => {
+	//first get the angle of the point
+	const currentAngle = Math.atan(y / x);
+
+	return {
+		x: Math.cos(currentAngle + angle),
+		y: Math.sin(currentAngle + angle)
+	};
+};
+
+/**
+ * A function to check whether a single point intersects with the river
+ * @param {Object} point The point which could intersect the river. An object with an 'x' and 'y' value 
+ * @param {Array} riverCoordinates The river segment coordinates. An array with objects containing an 'x' and 'y' value 
+ * @returns {Boolean} Whether the point intersects the river
+ */
+const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
+	//we can approximate the tree trunk as a point which simplifies the problem a lot
+	for (let i = 0; i < riverCoordinates.length - 1; i++) {
+		if (x > riverCoordinates[i].x && x < riverCoordinates[i + 1].x) {
+			//this is the closest segment
+			//first perform a low cost test
+			if (x < riverCoordinates[i].x - RIVER_WIDTH / 2 || x > riverCoordinates[i + 1].y + RIVER_WIDTH / 2 || y < riverCoordinates[i].y - RIVER_WIDTH / 2 || y > riverCoordinates[i + 1].y + RIVER_WIDTH / 2) {
+				return false;
+			}
+
+			//for a real check we have to rotate this segment to align with the x axis
+			//first we calculate the angle
+			const angle = Math.atan((riverCoordinates[i].y - riverCoordinates[i + 1].y) / (riverCoordinates[i].x - riverCoordinates[i + 1].x));
+			//now we have to rotate two points of the rectangle and the trunk coordinate back
+			const coordinate = rotatePoint({ x, y }, -angle, { x: 0, y: 0 });
+			const rectPoint1 = rotatePoint({
+				x: riverCoordinates[i].x,
+				y: riverCoordinates[i].y - RIVER_WIDTH
+			}, -angle, { x: 0, y: 0 });
+			const rectPoint2 = rotatePoint({
+				x: riverCoordinates[i + 1].x,
+				y: riverCoordinates[i + 1].y + RIVER_WIDTH
+			}, -angle, { x: 0, y: 0 });
+
+			console.log({ x, y }, riverCoordinates[i], riverCoordinates[i + 1], "|", coordinate, rectPoint1, rectPoint2);
+
+			//and now we can check whether the point is inside the rotated rectangle
+			if (angle > 0) {
+				//rectPoint2.y > rectPoint1.y
+				return coordinate.x >= rectPoint1.x && coordinate.y <= rectPoint2.x && coordinate.y >= rectPoint1.y && coordinate.y <= rectPoint2.y;
+			} else {
+				return coordinate.x >= rectPoint1.x && coordinate.y <= rectPoint2.x && coordinate.y <= rectPoint1.y && coordinate.y >= rectPoint2.y;
+			}
+		}
+	}
+	return false;
+};
+
+/**
+ * Generates random tree coordinates while checking for river intersection
+ * @param {Number} trees The amount of coordinates to generate
+ * @param {Array} riverCoordinates The river segment coordinates
+ * @returns {Array} An array containing objects with an 'x' and 'y' value 
+ */
+const generatePlantCoordinates = exports.generatePlantCoordinates = (trees = 0, riverCoordinates = []) => {
+	const treeCoordinates = [];
+	for (let i = 0; i < trees; i++) {
+		let x, y;
+		while (!x || !y || intersectsRiver({ x, y }, riverCoordinates)) {
+			x = Math.random() * GROUND_WIDTH;
+			y = GROUND_Y + Math.random() * GROUND_HEIGHT;
+		}
+		treeCoordinates.push({
+			x,
+			y
+		});
+	}
+	return treeCoordinates;
 };
 
 /***/ }),
@@ -1107,7 +1330,7 @@ var _constants = __webpack_require__(1);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-class Landscape extends _react2.default.Component {
+class Landscape extends _react2.default.PureComponent {
 	constructor() {
 		super();
 
@@ -1165,16 +1388,16 @@ var _initialiseProps = function () {
 	this.componentDidMount = () => {
 		/*this.updateInterval = setInterval(() => {
   	const d = new Date();
-  	this.setState({ hours: d.getHours() + d.getMinutes() / 60 });
-  }, 60000);*/
+  	this.setState({ hours: d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600 });
+  }, 30000);*/
 		this.updateInterval = setInterval(() => {
 			const d = new Date();
-			let hours = d.getMinutes() % 24 + d.getSeconds() / 60 + 8.5;
+			let hours = d.getMinutes() % 24 + d.getSeconds() / 60 + d.getMilliseconds() / 60000;
 			if (this.state.hours < 6 && hours >= 6 || this.state.hours < 18 && hours >= 18) {
 				this.animateSun();
 			}
 			this.setState({ hours });
-		}, 1000);
+		}, 100);
 	};
 
 	this.componentWillUnmount = () => {
@@ -1225,81 +1448,89 @@ const calculateCoordinateOffsetByDistance = (slope = false, distance) => {
 
 const toHour = n => Math.abs(n) % 24;
 
-const Clock = ({ clockSift = 19, day = true }) => {
-	const opacity = day ? "0.2" : "0.1";
+class Clock extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
 
-	return _react2.default.createElement(
-		"g",
-		{ className: "clock" },
-		_react2.default.createElement("circle", {
-			cx: _constants.CLOCK_X,
-			cy: _constants.CLOCK_Y,
-			r: _constants.CLOCK_RADIUS,
-			stroke: "#fff",
-			strokeWidth: "0.05",
-			fillOpacity: "0",
-			strokeOpacity: opacity
-		}),
-		[...Array(14)].map((e, i) => {
-			if (i === 0) {
-				return null;
-			}
-
-			const radOffset = _constants.VIEWPORT_START_RAD + _constants.HOUR_STEP * i;
-			//calc the coordinates on the circle
-			const { x: refX, y: refY } = caluclateScaledCircleCoordinate({ x: _constants.CLOCK_X, y: _constants.CLOCK_Y }, _constants.CLOCK_RADIUS, radOffset);
-
-			//then caluclate the slope
-			const slope = refX === _constants.CLOCK_X ? false : (refY - _constants.CLOCK_Y) / (refX - _constants.CLOCK_X);
-
-			//then use pythagorean theorem
-			let { dx, dy } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_LINE_LENGTH_OUTSIDE);
-			let { dx: dx2, dy: dy2 } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_LINE_LENGTH_INSIDE);
-			let { dx: dxText, dy: dyText } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_DISTANCE_TO_LABEL);
-
-			if (i >= 7) {
-				dx *= -1;
-				dy *= -1;
-
-				dx2 *= -1;
-				dy2 *= -1;
-
-				dxText *= -1;
-				dyText *= -1;
-			}
+		return _temp = super(...args), this.render = () => {
+			const { clockShift = 19, day = true } = this.props;
+			const opacity = day ? "0.2" : "0.1";
 
 			return _react2.default.createElement(
 				"g",
-				{ key: i },
-				_react2.default.createElement("line", {
-					key: i,
-					x1: refX + dx,
-					y1: refY + dy,
-					x2: refX - dx2,
-					y2: refY - dy2,
+				{ className: "clock" },
+				_react2.default.createElement("circle", {
+					cx: _constants.CLOCK_X,
+					cy: _constants.CLOCK_Y,
+					r: _constants.CLOCK_RADIUS,
 					stroke: "#fff",
 					strokeWidth: "0.05",
+					fillOpacity: "0",
 					strokeOpacity: opacity
 				}),
-				_react2.default.createElement(
-					"text",
-					{
-						x: refX - dxText,
-						y: refY - dyText,
-						fill: "#fff",
-						fontSize: "1.25",
-						fontFamily: "sans-serif",
-						transform: "rotate(" + (90 - radOffset * (180 / Math.PI)) + ", " + (refX - dxText) + "," + (refY - dyText) + ")",
-						textAnchor: "middle",
-						dominantBaseline: "central",
-						fillOpacity: opacity
-					},
-					toHour(clockSift - i) + ":00"
-				)
+				[...Array(14)].map((e, i) => {
+					if (i === 0) {
+						return null;
+					}
+
+					const radOffset = _constants.VIEWPORT_START_RAD + _constants.HOUR_STEP * i;
+					//calc the coordinates on the circle
+					const { x: refX, y: refY } = caluclateScaledCircleCoordinate({ x: _constants.CLOCK_X, y: _constants.CLOCK_Y }, _constants.CLOCK_RADIUS, radOffset);
+
+					//then caluclate the slope
+					const slope = refX === _constants.CLOCK_X ? false : (refY - _constants.CLOCK_Y) / (refX - _constants.CLOCK_X);
+
+					//then use pythagorean theorem
+					let { dx, dy } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_LINE_LENGTH_OUTSIDE);
+					let { dx: dx2, dy: dy2 } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_LINE_LENGTH_INSIDE);
+					let { dx: dxText, dy: dyText } = calculateCoordinateOffsetByDistance(slope, _constants.CLOCK_DISTANCE_TO_LABEL);
+
+					if (i >= 7) {
+						dx *= -1;
+						dy *= -1;
+
+						dx2 *= -1;
+						dy2 *= -1;
+
+						dxText *= -1;
+						dyText *= -1;
+					}
+
+					return _react2.default.createElement(
+						"g",
+						{ key: i },
+						_react2.default.createElement("line", {
+							key: i,
+							x1: refX + dx,
+							y1: refY + dy,
+							x2: refX - dx2,
+							y2: refY - dy2,
+							stroke: "#fff",
+							strokeWidth: "0.05",
+							strokeOpacity: opacity
+						}),
+						_react2.default.createElement(
+							"text",
+							{
+								x: refX - dxText,
+								y: refY - dyText,
+								fill: "#fff",
+								fontSize: "1.25",
+								fontFamily: "sans-serif",
+								transform: "rotate(" + (90 - radOffset * (180 / Math.PI)) + ", " + (refX - dxText) + "," + (refY - dyText) + ")",
+								textAnchor: "middle",
+								dominantBaseline: "central",
+								fillOpacity: opacity
+							},
+							toHour(clockShift - i) + ":00"
+						)
+					);
+				})
 			);
-		})
-	);
-};
+		}, _temp;
+	}
+
+}
 
 exports.default = Clock;
 
@@ -1326,59 +1557,58 @@ var _River = __webpack_require__(32);
 
 var _River2 = _interopRequireDefault(_River);
 
-var _Forest = __webpack_require__(33);
+var _Plants = __webpack_require__(33);
 
-var _Forest2 = _interopRequireDefault(_Forest);
+var _Plants2 = _interopRequireDefault(_Plants);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const riverCoordinates = (0, _constants.generateRiverCoordinates)();
 const GRADIENT_ID = (0, _utilities.genUID)();
 
-const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
-	//we know the line doesn't start/end in the trees
-	for (let i = 0; i < riverCoordinates.length; i++) {}
-};
+class Ground extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
 
-let trees = 5;
-const treeCoordinates = [];
-for (let i = 0; i < trees; i++) {
-	let x, y;
-	while (!x || !y /*|| intersectsRiver({ x, y }, riverCoordinates)*/) {
-		x = Math.random() * _constants.GROUND_WIDTH;
-		y = _constants.GROUND_Y + Math.random() * _constants.GROUND_HEIGHT - 10;
+		return _temp = super(...args), this.render = () => {
+			const {
+				plantCount = 10,
+				riverCoordinates = (0, _constants.generateRiverCoordinates)(),
+				treeCoordinates: treeCoords
+			} = this.props;
+
+			let treeCoordinates = [];
+
+			if (!treeCoords) {
+				treeCoordinates = (0, _constants.generatePlantCoordinates)(riverCoordinates);
+			}
+
+			return _react2.default.createElement(
+				"g",
+				{ className: "ground" },
+				_react2.default.createElement(
+					"defs",
+					null,
+					_react2.default.createElement(
+						"linearGradient",
+						{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
+						_react2.default.createElement("stop", { stopColor: "#B4ED50", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#429321", offset: "100%" })
+					)
+				),
+				_react2.default.createElement("rect", {
+					x: _constants.GROUND_X,
+					y: _constants.GROUND_Y,
+					width: _constants.GROUND_WIDTH,
+					height: _constants.GROUND_HEIGHT,
+					fill: "url(#" + GRADIENT_ID + ")"
+				}),
+				_react2.default.createElement(_River2.default, { coordinates: riverCoordinates }),
+				_react2.default.createElement(_Plants2.default, { coordinates: (0, _constants.generatePlantCoordinates)(plantCount) })
+			);
+		}, _temp;
 	}
-	treeCoordinates.push({
-		x,
-		y
-	});
-}
 
-const Ground = () => {
-	return _react2.default.createElement(
-		"g",
-		{ className: "ground" },
-		_react2.default.createElement(
-			"defs",
-			null,
-			_react2.default.createElement(
-				"linearGradient",
-				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
-				_react2.default.createElement("stop", { stopColor: "#B4ED50", offset: "0%" }),
-				_react2.default.createElement("stop", { stopColor: "#429321", offset: "100%" })
-			)
-		),
-		_react2.default.createElement("rect", {
-			x: _constants.GROUND_X,
-			y: _constants.GROUND_Y,
-			width: _constants.GROUND_WIDTH,
-			height: _constants.GROUND_HEIGHT,
-			fill: "url(#" + GRADIENT_ID + ")"
-		}),
-		_react2.default.createElement(_River2.default, { coordinates: riverCoordinates }),
-		_react2.default.createElement(_Forest2.default, { coordinates: treeCoordinates })
-	);
-};
+}
 
 exports.default = Ground;
 
@@ -1405,19 +1635,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const GRADIENT_ID = (0, _utilities.genUID)();
 
-const River = ({ coordinates }) => {
-	return _react2.default.createElement(
-		"g",
-		{ className: "river" },
-		_react2.default.createElement("polyline", {
-			id: "Path-4",
-			points: coordinates.map(obj => obj.x + " " + obj.y).join(" "),
-			stroke: "#4990E2",
-			fillOpacity: "0",
-			strokeWidth: _constants.RIVER_WIDTH
-		})
-	);
-};
+class River extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { coordinates } = this.props;
+			return _react2.default.createElement(
+				"g",
+				{ className: "river" },
+				_react2.default.createElement("polyline", {
+					id: "Path-4",
+					points: coordinates.map(obj => obj.x + " " + obj.y).join(" "),
+					stroke: "#4990E2",
+					fillOpacity: "0",
+					strokeWidth: _constants.RIVER_WIDTH
+				})
+			);
+		}, _temp;
+	}
+
+}
 
 exports.default = River;
 
@@ -1445,125 +1683,158 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const LEAF_GRADIENT_ID = (0, _utilities.genUID)();
 const TRUNK_GRADIENT_ID = (0, _utilities.genUID)();
 
-const Trunk = ({ x, y, width, height }) => {
-	return _react2.default.createElement("rect", {
-		fill: "url(#" + TRUNK_GRADIENT_ID + ")",
-		x: x,
-		y: y,
-		width: width,
-		height: height
-	});
-};
-
-const OvalTree = ({ x, y }) => {
-	//Everything in the g element is positioned relative to the current transformation matrix
-	return _react2.default.createElement(
-		"g",
-		{
-			className: "oval",
-			transform: "translate(" + x + "," + y + ")",
-			filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
-		},
-		_react2.default.createElement(Trunk, { x: "1.25", y: "4", width: "1", height: "4" }),
-		_react2.default.createElement("path", {
-			d: "M1.78684211,6.15263158 C2.42778309,6.15263158 3.5,5.56742335 3.5,3.86842105 C3.5,2.16941876 2.42778309,0 1.78684211,0 C1.14590112,0 0,2.16941876 0,3.86842105 C0,5.56742335 1.14590112,6.15263158 1.78684211,6.15263158 Z",
-			fill: "url(#" + LEAF_GRADIENT_ID + ")"
-		})
-	);
-};
-
-const AngularTree = ({ x, y }) => {
-	//Everything in the g element is positioned relative to the current transformation matrix
-	return _react2.default.createElement(
-		"g",
-		{
-			className: "angular",
-			transform: "translate(" + x + "," + y + ")",
-			filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
-		},
-		_react2.default.createElement(Trunk, { x: "1.5", y: "4", width: "1", height: "4" }),
-		_react2.default.createElement("polygon", {
-			fill: "url(#" + LEAF_GRADIENT_ID + ")",
-			points: "1.09090909 5.81818182 2.90909091 5.81818182 4 3.63636364 2 0 0 3.63636364"
-		})
-	);
-};
-
-const Fir = ({ x, y }) => {
-	//Everything in the g element is positioned relative to the current transformation matrix
-	return _react2.default.createElement(
-		"g",
-		{
-			className: "fir",
-			transform: "translate(" + x + "," + y + ")",
-			filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
-		},
-		_react2.default.createElement(Trunk, { x: "1.5", y: "4", width: "1", height: "4" }),
-		_react2.default.createElement("polygon", {
-			fill: "url(#" + LEAF_GRADIENT_ID + ")",
-			points: "0 5.63636364 4 5.63636364 2.90909091 2.72727273 3.81818182 2.72727273 2 0 0.181818182 2.72727273 1.09090909 2.72727273"
-		})
-	);
-};
-
-class Forest extends _react2.default.Component {
+class Trunk extends _react2.default.PureComponent {
 	constructor(...args) {
 		var _temp;
 
-		return _temp = super(...args), this.shouldComponentUpdate = () => false, _temp;
+		return _temp = super(...args), this.render = () => {
+			const { x, y, width, height } = this.props;
+			return _react2.default.createElement("rect", {
+				fill: "url(#" + TRUNK_GRADIENT_ID + ")",
+				x: x,
+				y: y,
+				width: width,
+				height: height
+			});
+		}, _temp;
 	}
 
-	render() {
-		const { coordinates, treeType = "mixed" } = this.props;
+}
 
-		return _react2.default.createElement(
-			"g",
-			{ className: "forest" },
-			_react2.default.createElement(
-				"defs",
-				null,
+class OvalTree extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp2;
+
+		return _temp2 = super(...args), this.render = () => {
+			const { x, y } = this.props;
+			//Everything in the g element is positioned relative to the current transformation matrix
+			return _react2.default.createElement(
+				"g",
+				{
+					className: "oval",
+					transform: "translate(" + x + "," + y + ")",
+					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+				},
+				_react2.default.createElement(Trunk, { x: "0", y: "-4", width: "1", height: "4" }),
+				_react2.default.createElement("path", {
+					d: "M0.75,-2 C1.15,-2 2.35,-2.5 2.35,-4 C2.35,-6 1.35,-8 0.65,-8 C-0.15,-8 -1.25,-6 -1.25,-4 C-1.25,-2.5 -0.25,-2 0.75,-2 Z",
+					fill: "url(#" + LEAF_GRADIENT_ID + ")"
+				})
+			);
+		}, _temp2;
+	}
+
+}
+
+class AngularTree extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp3;
+
+		return _temp3 = super(...args), this.render = () => {
+			const { x, y } = this.props;
+			//Everything in the g element is positioned relative to the current transformation matrix
+			return _react2.default.createElement(
+				"g",
+				{
+					className: "angular",
+					transform: "translate(" + x + "," + y + ")",
+					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+				},
+				_react2.default.createElement(Trunk, { x: "0", y: "-4", width: "1", height: "4" }),
+				_react2.default.createElement("polygon", {
+					fill: "url(#" + LEAF_GRADIENT_ID + ")",
+					points: "-0.5 -2 1.5 -2 2.5 -4 0.5 -8 -1.5 -4"
+				})
+			);
+		}, _temp3;
+	}
+
+}
+
+class Fir extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp4;
+
+		return _temp4 = super(...args), this.render = () => {
+			const { x, y } = this.props;
+			//Everything in the g element is positioned relative to the current transformation matrix
+			return _react2.default.createElement(
+				"g",
+				{
+					className: "fir",
+					transform: "translate(" + x + "," + y + ")",
+					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+				},
+				_react2.default.createElement(Trunk, { x: "0", y: "-4", width: "1", height: "4" }),
+				_react2.default.createElement("polygon", {
+					fill: "url(#" + LEAF_GRADIENT_ID + ")",
+					points: "-1.5 -2.5 2.5 -2.5 1.5 -5 2.5 -5 0.5 -8 -1.5 -5 -0.5 -5"
+				})
+			);
+		}, _temp4;
+	}
+
+}
+
+class Forest extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp5;
+
+		return _temp5 = super(...args), this.render = () => {
+			const { coordinates, treeType = "mixed" } = this.props;
+
+			return _react2.default.createElement(
+				"g",
+				{ className: "forest" },
 				_react2.default.createElement(
-					"linearGradient",
-					{
-						x1: "0%",
-						y1: "50%",
-						x2: "100%",
-						y2: "50%",
-						id: LEAF_GRADIENT_ID
-					},
-					_react2.default.createElement("stop", { stopColor: "#8CBE50", offset: "0%" }),
-					_react2.default.createElement("stop", { stopColor: "#78A050", offset: "100%" })
+					"defs",
+					null,
+					_react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "0%",
+							y1: "50%",
+							x2: "100%",
+							y2: "50%",
+							id: LEAF_GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#8CBE50", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#78A050", offset: "100%" })
+					),
+					_react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "0%",
+							y1: "50%",
+							x2: "100%",
+							y2: "50%",
+							id: TRUNK_GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#C37850", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#F39C12", offset: "100%" })
+					)
 				),
-				_react2.default.createElement(
-					"linearGradient",
-					{
-						x1: "0%",
-						y1: "50%",
-						x2: "100%",
-						y2: "50%",
-						id: TRUNK_GRADIENT_ID
-					},
-					_react2.default.createElement("stop", { stopColor: "#C37850", offset: "0%" }),
-					_react2.default.createElement("stop", { stopColor: "#F39C12", offset: "100%" })
-				)
-			),
-			coordinates.map(({ x, y }, index) => {
-				let type = treeType;
-				if (type === "mixed") {
-					const rnd = Math.random();
-					if (rnd < 1 / 3) {
-						type = OvalTree;
-					} else if (rnd < 2 / 3) {
-						type = AngularTree;
-					} else {
-						type = Fir;
+				coordinates.sort(({ y: y1 }, { y: y2 }) => {
+					return y1 - y2;
+				}).map(({ x, y }, index) => {
+					let type = treeType;
+					if (type === "mixed") {
+						const rnd = Math.random();
+						if (rnd < 1 / 3) {
+							type = OvalTree;
+						} else if (rnd < 2 / 3) {
+							type = AngularTree;
+						} else {
+							type = Fir;
+						}
 					}
-				}
 
-				return _react2.default.createElement(type, { key: index, x, y });
-			})
-		);
+					return _react2.default.createElement(type, { key: index, x, y });
+				})
+			);
+		}, _temp5;
 	}
+
 }
 
 exports.default = Forest;
@@ -1591,173 +1862,52 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const GRADIENT_ID = (0, _utilities.genUID)();
 
-const STOPS = {
-	day: {
-		6: {
-			from: {
-				r: 240,
-				g: 191,
-				b: 59
-			},
-			to: {
-				r: 44,
-				g: 62,
-				b: 80
-			}
-		},
-		10: {
-			from: {
-				r: 137,
-				g: 196,
-				b: 244
-			},
-			to: {
-				r: 34,
-				g: 167,
-				b: 240
-			}
-		},
-		12: {
-			from: {
-				r: 137,
-				g: 196,
-				b: 244
-			},
-			to: {
-				r: 34,
-				g: 167,
-				b: 240
-			}
-		},
-		18: {
-			from: {
-				r: 249,
-				g: 105,
-				b: 14
-			},
-			to: {
-				r: 249,
-				g: 191,
-				b: 59
-			}
-		}
-	},
-	night: {
-		18: {
-			from: {
-				r: 44,
-				g: 62,
-				b: 80
-			},
-			to: {
-				r: 52,
-				g: 73,
-				b: 94
-			}
-		},
-		0: {
-			from: {
-				r: 44,
-				g: 62,
-				b: 80
-			},
-			to: {
-				r: 52,
-				g: 73,
-				b: 94
-			}
-		},
-		6: {
-			from: {
-				r: 44,
-				g: 62,
-				b: 80
-			},
-			to: {
-				r: 52,
-				g: 73,
-				b: 94
-			}
-		}
-	}
-};
+class Sky extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
 
-const Sky = ({ hours = 0, day = true, sunX = 50, sunY = 45 }) => {
-	const stops = day ? STOPS.day : STOPS.night;
-	let stopKeys = Object.keys(stops).map(k => Number.parseFloat(k));
-	let searchHours = day ? hours : hours < 18 ? hours + 24 : hours;
+		return _temp = super(...args), this.render = () => {
+			const { hours = 0, day = true, sunX = 50, sunY = 45 } = this.props;
 
-	let first, second;
+			const gradient = (0, _constants.calculateSkyGradient)(hours, day);
 
-	if (day) {
-		stopKeys = stopKeys.sort((a, b) => {
-			return a - b;
-		});
-	} else {
-		stopKeys = stopKeys.map(n => n < 18 ? n + 24 : n).sort((a, b) => {
-			return a - b;
-		});
-	}
-
-	for (let i = 0; i < stopKeys.length; i++) {
-		if (stopKeys[i] === searchHours) {
-			second = stopKeys[i];
-			first = stopKeys[i];
-			break;
-		} else if (stopKeys[i] > searchHours) {
-			second = stopKeys[i];
-			first = stopKeys[i - 1];
-
-			break;
-		} else if (i === stopKeys.length - 1) {
-			//if nothing was found
-		}
-	}
-
-	first = first >= 24 ? first - 24 : first;
-	second = second >= 24 ? second - 24 : second;
-
-	const progress = second == first ? 0 : (hours - first) / (second - first);
-	let gradient = { from: {}, to: {} };
-	["r", "g", "b"].forEach(colorKey => {
-		gradient.from[colorKey] = Math.round(stops[first].from[colorKey] * (1 - progress) + stops[second].from[colorKey] * progress);
-		gradient.to[colorKey] = Math.round(stops[first].to[colorKey] * (1 - progress) + stops[second].to[colorKey] * progress);
-	});
-
-	return _react2.default.createElement(
-		"g",
-		{ className: "sky" },
-		_react2.default.createElement(
-			"defs",
-			null,
-			_react2.default.createElement(
-				"linearGradient",
-				{
-					x1: 100 * sunX / _constants.SVG_WIDTH + "%",
-					y1: "0%",
-					x2: "50%",
-					y2: "100%",
-					id: GRADIENT_ID
-				},
-				_react2.default.createElement("stop", {
-					stopColor: "#" + Object.values(gradient.from).map(v => v.toString(16)).join(""),
-					offset: "0%"
-				}),
-				_react2.default.createElement("stop", {
-					stopColor: "#" + Object.values(gradient.to).map(v => v.toString(16)).join(""),
-					offset: "100%"
+			return _react2.default.createElement(
+				"g",
+				{ className: "sky" },
+				_react2.default.createElement(
+					"defs",
+					null,
+					_react2.default.createElement(
+						"linearGradient",
+						{
+							x1: 100 * sunX / _constants.SVG_WIDTH + "%",
+							y1: "0%",
+							x2: "50%",
+							y2: "100%",
+							id: GRADIENT_ID
+						},
+						_react2.default.createElement("stop", {
+							stopColor: "#" + Object.values(gradient.from).map(v => v.toString(16)).join(""),
+							offset: "0%"
+						}),
+						_react2.default.createElement("stop", {
+							stopColor: "#" + Object.values(gradient.to).map(v => v.toString(16)).join(""),
+							offset: "100%"
+						})
+					)
+				),
+				_react2.default.createElement("rect", {
+					x: _constants.SKY_X,
+					y: _constants.SKY_Y,
+					width: _constants.SVG_WIDTH,
+					height: _constants.SVG_HEIGHT,
+					fill: "url(#" + GRADIENT_ID + ")"
 				})
-			)
-		),
-		_react2.default.createElement("rect", {
-			x: _constants.SKY_X,
-			y: _constants.SKY_Y,
-			width: _constants.SVG_WIDTH,
-			height: _constants.SVG_HEIGHT,
-			fill: "url(#" + GRADIENT_ID + ")"
-		})
-	);
-};
+			);
+		}, _temp;
+	}
+
+}
 
 exports.default = Sky;
 
@@ -1788,50 +1938,81 @@ const SHADOW_ID = (0, _utilities.genUID)();
 const SHADOW_OFFSET_OUT = (0, _utilities.genUID)();
 const SHADOW_BLUR_OUT = (0, _utilities.genUID)();
 
-const Sun = ({ x = 50, y = 45, day = true }) => {
-	return _react2.default.createElement(
-		"g",
-		{ className: "sun", filter: "url(#" + _constants.DROP_SHADOW_ID + ")" },
-		_react2.default.createElement(
-			"defs",
-			null,
-			day ? _react2.default.createElement(
-				"linearGradient",
-				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
-				_react2.default.createElement("stop", { stopColor: "#FBDA61", offset: "0%" }),
-				_react2.default.createElement("stop", { stopColor: "#F76B1C", offset: "100%" })
-			) : _react2.default.createElement(
-				"linearGradient",
-				{ x1: "50%", y1: "0%", x2: "50%", y2: "100%", id: GRADIENT_ID },
-				_react2.default.createElement("stop", { stopColor: "#F2F1EF", offset: "0%" }),
-				_react2.default.createElement("stop", { stopColor: "#DADFE1", offset: "100%" })
-			),
-			_react2.default.createElement(
-				"filter",
-				{
-					x: "-5%",
-					y: "-5%",
-					width: "100%",
-					height: "100%",
-					filterUnits: "objectBoundingBox",
-					id: SHADOW_ID
-				},
-				_react2.default.createElement("feOffset", { dx: "0", dy: "2", "in": "SourceAlpha", result: SHADOW_OFFSET_OUT }),
-				_react2.default.createElement("feGaussianBlur", {
-					stdDeviation: "2",
-					"in": SHADOW_OFFSET_OUT,
-					result: SHADOW_BLUR_OUT
-				}),
-				_react2.default.createElement("feColorMatrix", {
-					values: "0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0",
-					type: "matrix",
-					"in": SHADOW_BLUR_OUT
+class Sun extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { x = 50, y = 45, day = true } = this.props;
+
+			return _react2.default.createElement(
+				"g",
+				{ className: "sun", filter: "url(#" + _constants.DROP_SHADOW_ID + ")" },
+				_react2.default.createElement(
+					"defs",
+					null,
+					day ? _react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "50%",
+							y1: "0%",
+							x2: "50%",
+							y2: "100%",
+							id: GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#FBDA61", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#F76B1C", offset: "100%" })
+					) : _react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "50%",
+							y1: "0%",
+							x2: "50%",
+							y2: "100%",
+							id: GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#F2F1EF", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#DADFE1", offset: "100%" })
+					),
+					_react2.default.createElement(
+						"filter",
+						{
+							x: "-5%",
+							y: "-5%",
+							width: "100%",
+							height: "100%",
+							filterUnits: "objectBoundingBox",
+							id: SHADOW_ID
+						},
+						_react2.default.createElement("feOffset", {
+							dx: "0",
+							dy: "2",
+							"in": "SourceAlpha",
+							result: SHADOW_OFFSET_OUT
+						}),
+						_react2.default.createElement("feGaussianBlur", {
+							stdDeviation: "2",
+							"in": SHADOW_OFFSET_OUT,
+							result: SHADOW_BLUR_OUT
+						}),
+						_react2.default.createElement("feColorMatrix", {
+							values: "0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0",
+							type: "matrix",
+							"in": SHADOW_BLUR_OUT
+						})
+					)
+				),
+				_react2.default.createElement("circle", {
+					cx: x,
+					cy: y,
+					r: _constants.SUN_RADIUS,
+					fill: "url(#" + GRADIENT_ID + ")"
 				})
-			)
-		),
-		_react2.default.createElement("circle", { cx: x, cy: y, r: _constants.SUN_RADIUS, fill: "url(#" + GRADIENT_ID + ")" })
-	);
-};
+			);
+		}, _temp;
+	}
+
+}
 
 exports.default = Sun;
 
@@ -1860,37 +2041,45 @@ const OFFSET_OUT = (0, _utilities.genUID)();
 const BLUR_OUT = (0, _utilities.genUID)();
 const MATRIX_OUT = (0, _utilities.genUID)();
 
-const DropShadowFilter = ({ dx = 0.05, dy = 0.1, deviation = 0.05 }) => {
-	return _react2.default.createElement(
-		"filter",
-		{
-			x: _constants.DROP_SHADOW_X,
-			y: _constants.DROP_SHADOW_Y,
-			width: _constants.DROP_SHADOW_WIDTH,
-			height: _constants.DROP_SHADOW_HEIGHT,
-			filterUnits: "objectBoundingBox",
-			id: _constants.DROP_SHADOW_ID
-		},
-		_react2.default.createElement("feOffset", { dx: dx, dy: dy, "in": "SourceGraphic", result: OFFSET_OUT }),
-		_react2.default.createElement("feGaussianBlur", {
-			stdDeviation: deviation,
-			"in": OFFSET_OUT,
-			result: BLUR_OUT
-		}),
-		_react2.default.createElement("feColorMatrix", {
-			values: "0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.4 0",
-			type: "matrix",
-			"in": BLUR_OUT,
-			result: MATRIX_OUT
-		}),
-		_react2.default.createElement(
-			"feMerge",
-			null,
-			_react2.default.createElement("feMergeNode", { "in": MATRIX_OUT }),
-			_react2.default.createElement("feMergeNode", { "in": "SourceGraphic" })
-		)
-	);
-};
+class DropShadowFilter extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { dx = 0.05, dy = 0.1, deviation = 0.05 } = this.props;
+			return _react2.default.createElement(
+				"filter",
+				{
+					x: _constants.DROP_SHADOW_X,
+					y: _constants.DROP_SHADOW_Y,
+					width: _constants.DROP_SHADOW_WIDTH,
+					height: _constants.DROP_SHADOW_HEIGHT,
+					filterUnits: "objectBoundingBox",
+					id: _constants.DROP_SHADOW_ID
+				},
+				_react2.default.createElement("feOffset", { dx: dx, dy: dy, "in": "SourceGraphic", result: OFFSET_OUT }),
+				_react2.default.createElement("feGaussianBlur", {
+					stdDeviation: deviation,
+					"in": OFFSET_OUT,
+					result: BLUR_OUT
+				}),
+				_react2.default.createElement("feColorMatrix", {
+					values: "0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.4 0",
+					type: "matrix",
+					"in": BLUR_OUT,
+					result: MATRIX_OUT
+				}),
+				_react2.default.createElement(
+					"feMerge",
+					null,
+					_react2.default.createElement("feMergeNode", { "in": MATRIX_OUT }),
+					_react2.default.createElement("feMergeNode", { "in": "SourceGraphic" })
+				)
+			);
+		}, _temp;
+	}
+
+}
 
 exports.default = DropShadowFilter;
 
