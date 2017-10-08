@@ -4,14 +4,15 @@ import Clock from "./Clock";
 import Ground from "./Ground";
 import Sky from "./Sky";
 import Sun from "./Sun";
+import Hills from "./background/Hills";
 
 import DropShadowFilter from "./helpers/DropShadowFilter";
 
 import {
 	SVG_WIDTH,
 	SVG_HEIGHT,
+	ANIMATION_FPS_CAP,
 	SUN_ANIMATION_DURATION,
-	SUN_ANIMATION_STEPS,
 	calculateSunPosition,
 	calculateSunPositionInAnimation,
 	isDay
@@ -22,21 +23,39 @@ class Landscape extends React.PureComponent {
 		super();
 
 		const d = new Date();
-		this.state = { hours: d.getHours() + d.getMinutes() / 60 };
+		this.state = {
+			hours: d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600
+		};
 	}
 
-	animateSun = (passed = 0) => {
-		if (passed >= SUN_ANIMATION_DURATION) {
-			clearTimeout(this.morning);
-			this.setState({ overrideSunX: undefined, overrideSunY: undefined });
-			return;
-		}
-		const { x, y } = calculateSunPositionInAnimation(passed);
-		this.setState({ overrideSunX: x, overrideSunY: y });
+	animateSun = () => {
+		const now = Date.now();
+		let last = this.lastMovedClouds;
+		const passed = now - last;
 
-		this.morning = setTimeout(() => {
-			this.animateSun(passed + SUN_ANIMATION_DURATION / SUN_ANIMATION_STEPS);
-		}, SUN_ANIMATION_DURATION / SUN_ANIMATION_STEPS);
+		if (!last) {
+			last = this.lastMovedClouds = Date.now();
+		}
+
+		if (passed > 1 / ANIMATION_FPS_CAP * 1000) {
+			const { x, y } = calculateSunPositionInAnimation(
+				this.totalAnimationTimePassed
+			);
+			this.setState({ overrideSunX: x, overrideSunY: y });
+
+			this.lastMovedClouds = now;
+			this.totalAnimationTimePassed += passed;
+
+			if (this.totalAnimationTimePassed >= SUN_ANIMATION_DURATION) {
+				this.animate = false;
+			}
+		}
+
+		if (this.animate) {
+			window.requestAnimationFrame(this.animateSun);
+		} else {
+			this.setState({ overrideSunX: undefined, overrideSunY: undefined });
+		}
 	};
 
 	componentDidMount = () => {
@@ -46,22 +65,23 @@ class Landscape extends React.PureComponent {
 		}, 30000);*/
 		this.updateInterval = setInterval(() => {
 			const d = new Date();
-			let hours =
-				d.getMinutes() % 24 + d.getSeconds() / 60 + d.getMilliseconds() / 60000;
+			let hours = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
+
 			if (
-				(this.state.hours < 6 && hours >= 6) ||
-				(this.state.hours < 18 && hours >= 18)
+				(this.state.hours < 6 && hours >= 6 && hours < 7) ||
+				(this.state.hours < 18 && hours >= 18 && hours < 19)
 			) {
-				this.animateSun();
+				this.animate = true;
+				this.totalAnimationTimePassed = 0;
+				window.requestAnimationFrame(this.animateSun);
 			}
+
 			this.setState({ hours });
 		}, 100);
 	};
 
 	componentWillUnmount = () => {
-		if (this.updateInterval) {
-			clearInterval(this.updateInterval);
-		}
+		this.animate = false;
 	};
 
 	render() {
@@ -86,6 +106,7 @@ class Landscape extends React.PureComponent {
 					y={overrideSunY ? overrideSunY : SUN_Y}
 					day={day}
 				/>
+				<Hills />
 				<Ground />
 			</svg>
 		);

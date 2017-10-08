@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,6 +71,22 @@ module.exports = require("react");
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+let counter = 0;
+
+const genUID = exports.genUID = () => {
+	return "uid-" + counter++;
+};
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -432,12 +448,12 @@ const rotatePoint = ({ x, y }, angle = 0, {
 
 	y: yOrigin
 }) => {
-	//first get the angle of the point
-	const currentAngle = Math.atan(y / x);
+	let s = Math.sin(angle),
+	    c = Math.cos(angle);
 
 	return {
-		x: Math.cos(currentAngle + angle),
-		y: Math.sin(currentAngle + angle)
+		x: (x - xOrigin) * c - (y - yOrigin) * s + xOrigin,
+		y: (x - xOrigin) * s + (y - yOrigin) * c + yOrigin
 	};
 };
 
@@ -453,7 +469,7 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 		if (x > riverCoordinates[i].x && x < riverCoordinates[i + 1].x) {
 			//this is the closest segment
 			//first perform a low cost test
-			if (x < riverCoordinates[i].x - RIVER_WIDTH / 2 || x > riverCoordinates[i + 1].y + RIVER_WIDTH / 2 || y < riverCoordinates[i].y - RIVER_WIDTH / 2 || y > riverCoordinates[i + 1].y + RIVER_WIDTH / 2) {
+			if (riverCoordinates[i].y < riverCoordinates[i + 1].y ? y < riverCoordinates[i].y - RIVER_WIDTH || y > riverCoordinates[i + 1].y + RIVER_WIDTH : y > riverCoordinates[i].y + RIVER_WIDTH || y < riverCoordinates[i + 1].y - RIVER_WIDTH) {
 				return false;
 			}
 
@@ -464,21 +480,19 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 			const coordinate = rotatePoint({ x, y }, -angle, { x: 0, y: 0 });
 			const rectPoint1 = rotatePoint({
 				x: riverCoordinates[i].x,
-				y: riverCoordinates[i].y - RIVER_WIDTH
+				y: riverCoordinates[i].y
 			}, -angle, { x: 0, y: 0 });
 			const rectPoint2 = rotatePoint({
 				x: riverCoordinates[i + 1].x,
-				y: riverCoordinates[i + 1].y + RIVER_WIDTH
+				y: riverCoordinates[i + 1].y
 			}, -angle, { x: 0, y: 0 });
-
-			console.log({ x, y }, riverCoordinates[i], riverCoordinates[i + 1], "|", coordinate, rectPoint1, rectPoint2);
 
 			//and now we can check whether the point is inside the rotated rectangle
 			if (angle > 0) {
 				//rectPoint2.y > rectPoint1.y
-				return coordinate.x >= rectPoint1.x && coordinate.y <= rectPoint2.x && coordinate.y >= rectPoint1.y && coordinate.y <= rectPoint2.y;
+				return coordinate.x >= rectPoint1.x - RIVER_WIDTH && coordinate.x <= rectPoint2.x + RIVER_WIDTH && coordinate.y >= rectPoint1.y - RIVER_WIDTH && coordinate.y <= rectPoint2.y + RIVER_WIDTH;
 			} else {
-				return coordinate.x >= rectPoint1.x && coordinate.y <= rectPoint2.x && coordinate.y <= rectPoint1.y && coordinate.y >= rectPoint2.y;
+				return coordinate.x >= rectPoint1.x - RIVER_WIDTH && coordinate.x <= rectPoint2.x + RIVER_WIDTH && coordinate.y <= rectPoint1.y + RIVER_WIDTH && coordinate.y >= rectPoint2.y - RIVER_WIDTH;
 			}
 		}
 	}
@@ -487,17 +501,17 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 
 /**
  * Generates random tree coordinates while checking for river intersection
- * @param {Number} trees The amount of coordinates to generate
+ * @param {Number} count The amount of coordinates to generate
  * @param {Array} riverCoordinates The river segment coordinates
  * @returns {Array} An array containing objects with an 'x' and 'y' value 
  */
-const generatePlantCoordinates = exports.generatePlantCoordinates = (trees = 0, riverCoordinates = []) => {
+const generatePlantCoordinates = exports.generatePlantCoordinates = (count = 0, riverCoordinates = []) => {
 	const treeCoordinates = [];
-	for (let i = 0; i < trees; i++) {
+	for (let i = 0; i < count; i++) {
 		let x, y;
 		while (!x || !y || intersectsRiver({ x, y }, riverCoordinates)) {
 			x = Math.random() * GROUND_WIDTH;
-			y = GROUND_Y + Math.random() * GROUND_HEIGHT;
+			y = GROUND_Y + 5 + Math.random() * (GROUND_HEIGHT - 10);
 		}
 		treeCoordinates.push({
 			x,
@@ -508,7 +522,7 @@ const generatePlantCoordinates = exports.generatePlantCoordinates = (trees = 0, 
 };
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -517,51 +531,96 @@ const generatePlantCoordinates = exports.generatePlantCoordinates = (trees = 0, 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-let counter = 0;
 
-const genUID = exports.genUID = () => {
-	return "uid-" + counter++;
-};
+var _react = __webpack_require__(0);
 
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
+var _react2 = _interopRequireDefault(_react);
 
-module.exports = require("path");
+var _utilities = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const TRUNK_GRADIENT_ID = (0, _utilities.genUID)();
+
+class Trunk extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { x, y } = this.props;
+			return _react2.default.createElement(
+				"g",
+				null,
+				_react2.default.createElement(
+					"defs",
+					null,
+					_react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "0%",
+							y1: "50%",
+							x2: "100%",
+							y2: "50%",
+							id: TRUNK_GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#C37850", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#F39C12", offset: "100%" })
+					)
+				),
+				_react2.default.createElement("rect", {
+					fill: "url(#" + TRUNK_GRADIENT_ID + ")",
+					x: x,
+					y: y,
+					width: "1",
+					height: "4"
+				})
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = Trunk;
 
 /***/ }),
 /* 4 */
 /***/ (function(module, exports) {
 
-module.exports = {"KEY_PATH":"./keys/server.key","CERT_PATH":"./keys/server.crt","HTTP_PORT":8080,"API_URL":"","CLIENT_ID":1,"CLIENT_SECRET":""}
+module.exports = require("path");
 
 /***/ }),
 /* 5 */
 /***/ (function(module, exports) {
 
-module.exports = require("webpack");
+module.exports = {"KEY_PATH":"./keys/server.key","CERT_PATH":"./keys/server.crt","HTTP_PORT":8080,"API_URL":"","CLIENT_ID":1,"CLIENT_SECRET":""}
 
 /***/ }),
 /* 6 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-module.exports = __webpack_require__(7);
-
+module.exports = require("webpack");
 
 /***/ }),
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
+module.exports = __webpack_require__(8);
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
 
 
-const http2 = __webpack_require__(8);
-const express = __webpack_require__(9);
-const compression = __webpack_require__(10);
-const promiseRequest = __webpack_require__(11);
+const http2 = __webpack_require__(9);
+const express = __webpack_require__(10);
+const compression = __webpack_require__(11);
+const promiseRequest = __webpack_require__(12);
 
-const path = __webpack_require__(3);
-const fs = __webpack_require__(12);
+const path = __webpack_require__(4);
+const fs = __webpack_require__(13);
 
 const {
 	KEY_PATH,
@@ -570,8 +629,8 @@ const {
 	API_URL,
 	CLIENT_ID,
 	CLIENT_SECRET
-} = __webpack_require__(4);
-const page = __webpack_require__(13);
+} = __webpack_require__(5);
+const page = __webpack_require__(14);
 
 const expressServer = express();
 const key = fs.readFileSync(KEY_PATH);
@@ -653,15 +712,15 @@ expressServer.get("/oauth-callback", (request, response) => {
 });
 
 if (process.env.NODE_ENV === "development") {
-	const webpack = __webpack_require__(5);
-	const webpackConfig = __webpack_require__(37);
+	const webpack = __webpack_require__(6);
+	const webpackConfig = __webpack_require__(43);
 	const compiler = webpack(webpackConfig);
 
-	expressServer.use(__webpack_require__(38)(compiler, {
+	expressServer.use(__webpack_require__(44)(compiler, {
 		publicPath: webpackConfig.output.publicPath
 	}));
 
-	expressServer.use(__webpack_require__(39)(compiler));
+	expressServer.use(__webpack_require__(45)(compiler));
 
 	expressServer.get("*", (request, response) => {
 		return renderSite(request, response);
@@ -702,37 +761,37 @@ if (process.env.NODE_ENV === "development") {
 }
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = require("spdy");
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = require("compression");
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = require("request-promise-native");
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -742,23 +801,23 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(14);
+var _propTypes = __webpack_require__(15);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _server = __webpack_require__(15);
+var _server = __webpack_require__(16);
 
 var _server2 = _interopRequireDefault(_server);
 
-var _universalRouter = __webpack_require__(16);
+var _universalRouter = __webpack_require__(17);
 
 var _universalRouter2 = _interopRequireDefault(_universalRouter);
 
-var _Api = __webpack_require__(17);
+var _Api = __webpack_require__(18);
 
 var _Api2 = _interopRequireDefault(_Api);
 
-var _routes = __webpack_require__(20);
+var _routes = __webpack_require__(21);
 
 var _routes2 = _interopRequireDefault(_routes);
 
@@ -828,25 +887,25 @@ module.exports = request => {
 };
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 module.exports = require("prop-types");
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = require("react-dom/server");
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 module.exports = require("universal-router");
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -858,13 +917,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _isomorphicFetch = __webpack_require__(18);
+var _isomorphicFetch = __webpack_require__(19);
 
 var _isomorphicFetch2 = _interopRequireDefault(_isomorphicFetch);
 
-var _relayRuntime = __webpack_require__(19);
+var _relayRuntime = __webpack_require__(20);
 
-var _config = __webpack_require__(4);
+var _config = __webpack_require__(5);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -912,19 +971,19 @@ const create = ({ baseUrl = _config.API_URL, headers = {} }) => {
 exports.default = { create };
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("isomorphic-fetch");
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("relay-runtime");
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -938,7 +997,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _App = __webpack_require__(21);
+var _App = __webpack_require__(22);
 
 var _App2 = _interopRequireDefault(_App);
 
@@ -966,7 +1025,7 @@ exports.default = [{
 }];
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -980,15 +1039,15 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _withStyles = __webpack_require__(22);
+var _withStyles = __webpack_require__(23);
 
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
-var _App = __webpack_require__(23);
+var _App = __webpack_require__(24);
 
 var _App2 = _interopRequireDefault(_App);
 
-var _Landscape = __webpack_require__(29);
+var _Landscape = __webpack_require__(30);
 
 var _Landscape2 = _interopRequireDefault(_Landscape);
 
@@ -1011,18 +1070,18 @@ const App = ({ api }) => {
 exports.default = (0, _withStyles2.default)(_App2.default)(App);
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 module.exports = require("isomorphic-style-loader/lib/withStyles");
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-    var content = __webpack_require__(24);
-    var insertCss = __webpack_require__(26);
+    var content = __webpack_require__(25);
+    var insertCss = __webpack_require__(27);
 
     if (typeof content === 'string') {
       content = [[module.i, content, '']];
@@ -1052,10 +1111,10 @@ module.exports = require("isomorphic-style-loader/lib/withStyles");
   
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(25)(undefined);
+exports = module.exports = __webpack_require__(26)(undefined);
 // imports
 
 
@@ -1068,7 +1127,7 @@ exports.locals = {
 };
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
 /*
@@ -1150,17 +1209,17 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _stringify = __webpack_require__(27);
+var _stringify = __webpack_require__(28);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _slicedToArray2 = __webpack_require__(28);
+var _slicedToArray2 = __webpack_require__(29);
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
@@ -1280,19 +1339,19 @@ function insertCss(styles) {
 module.exports = insertCss;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-runtime/core-js/json/stringify");
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-runtime/helpers/slicedToArray");
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1306,27 +1365,31 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Clock = __webpack_require__(30);
+var _Clock = __webpack_require__(31);
 
 var _Clock2 = _interopRequireDefault(_Clock);
 
-var _Ground = __webpack_require__(31);
+var _Ground = __webpack_require__(32);
 
 var _Ground2 = _interopRequireDefault(_Ground);
 
-var _Sky = __webpack_require__(34);
+var _Sky = __webpack_require__(38);
 
 var _Sky2 = _interopRequireDefault(_Sky);
 
-var _Sun = __webpack_require__(35);
+var _Sun = __webpack_require__(40);
 
 var _Sun2 = _interopRequireDefault(_Sun);
 
-var _DropShadowFilter = __webpack_require__(36);
+var _Hills = __webpack_require__(41);
+
+var _Hills2 = _interopRequireDefault(_Hills);
+
+var _DropShadowFilter = __webpack_require__(42);
 
 var _DropShadowFilter2 = _interopRequireDefault(_DropShadowFilter);
 
-var _constants = __webpack_require__(1);
+var _constants = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1365,6 +1428,7 @@ class Landscape extends _react2.default.PureComponent {
 				y: overrideSunY ? overrideSunY : SUN_Y,
 				day: day
 			}),
+			_react2.default.createElement(_Hills2.default, null),
 			_react2.default.createElement(_Ground2.default, null)
 		);
 	}
@@ -1410,7 +1474,7 @@ var _initialiseProps = function () {
 exports.default = Landscape;
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1424,9 +1488,9 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(2);
+var _utilities = __webpack_require__(1);
 
-var _constants = __webpack_require__(1);
+var _constants = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1535,7 +1599,7 @@ class Clock extends _react2.default.PureComponent {
 exports.default = Clock;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1549,17 +1613,17 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(2);
+var _utilities = __webpack_require__(1);
 
-var _constants = __webpack_require__(1);
+var _constants = __webpack_require__(2);
 
-var _River = __webpack_require__(32);
+var _River = __webpack_require__(33);
 
 var _River2 = _interopRequireDefault(_River);
 
-var _Plants = __webpack_require__(33);
+var _GroundDecoration = __webpack_require__(34);
 
-var _Plants2 = _interopRequireDefault(_Plants);
+var _GroundDecoration2 = _interopRequireDefault(_GroundDecoration);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1571,15 +1635,15 @@ class Ground extends _react2.default.PureComponent {
 
 		return _temp = super(...args), this.render = () => {
 			const {
-				plantCount = 10,
+				decorationCount = 10,
 				riverCoordinates = (0, _constants.generateRiverCoordinates)(),
-				treeCoordinates: treeCoords
+				decorationCoordinates: decCoords
 			} = this.props;
 
-			let treeCoordinates = [];
+			let decorationCoordinates = [];
 
-			if (!treeCoords) {
-				treeCoordinates = (0, _constants.generatePlantCoordinates)(riverCoordinates);
+			if (!decCoords) {
+				decorationCoordinates = (0, _constants.generatePlantCoordinates)(decorationCount, riverCoordinates);
 			}
 
 			return _react2.default.createElement(
@@ -1603,7 +1667,7 @@ class Ground extends _react2.default.PureComponent {
 					fill: "url(#" + GRADIENT_ID + ")"
 				}),
 				_react2.default.createElement(_River2.default, { coordinates: riverCoordinates }),
-				_react2.default.createElement(_Plants2.default, { coordinates: (0, _constants.generatePlantCoordinates)(plantCount) })
+				_react2.default.createElement(_GroundDecoration2.default, { coordinates: decorationCoordinates })
 			);
 		}, _temp;
 	}
@@ -1613,7 +1677,7 @@ class Ground extends _react2.default.PureComponent {
 exports.default = Ground;
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1627,9 +1691,9 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(2);
+var _utilities = __webpack_require__(1);
 
-var _constants = __webpack_require__(1);
+var _constants = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1660,186 +1724,6 @@ class River extends _react2.default.PureComponent {
 exports.default = River;
 
 /***/ }),
-/* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _utilities = __webpack_require__(2);
-
-var _constants = __webpack_require__(1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const LEAF_GRADIENT_ID = (0, _utilities.genUID)();
-const TRUNK_GRADIENT_ID = (0, _utilities.genUID)();
-
-class Trunk extends _react2.default.PureComponent {
-	constructor(...args) {
-		var _temp;
-
-		return _temp = super(...args), this.render = () => {
-			const { x, y, width, height } = this.props;
-			return _react2.default.createElement("rect", {
-				fill: "url(#" + TRUNK_GRADIENT_ID + ")",
-				x: x,
-				y: y,
-				width: width,
-				height: height
-			});
-		}, _temp;
-	}
-
-}
-
-class OvalTree extends _react2.default.PureComponent {
-	constructor(...args) {
-		var _temp2;
-
-		return _temp2 = super(...args), this.render = () => {
-			const { x, y } = this.props;
-			//Everything in the g element is positioned relative to the current transformation matrix
-			return _react2.default.createElement(
-				"g",
-				{
-					className: "oval",
-					transform: "translate(" + x + "," + y + ")",
-					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
-				},
-				_react2.default.createElement(Trunk, { x: "0", y: "-4", width: "1", height: "4" }),
-				_react2.default.createElement("path", {
-					d: "M0.75,-2 C1.15,-2 2.35,-2.5 2.35,-4 C2.35,-6 1.35,-8 0.65,-8 C-0.15,-8 -1.25,-6 -1.25,-4 C-1.25,-2.5 -0.25,-2 0.75,-2 Z",
-					fill: "url(#" + LEAF_GRADIENT_ID + ")"
-				})
-			);
-		}, _temp2;
-	}
-
-}
-
-class AngularTree extends _react2.default.PureComponent {
-	constructor(...args) {
-		var _temp3;
-
-		return _temp3 = super(...args), this.render = () => {
-			const { x, y } = this.props;
-			//Everything in the g element is positioned relative to the current transformation matrix
-			return _react2.default.createElement(
-				"g",
-				{
-					className: "angular",
-					transform: "translate(" + x + "," + y + ")",
-					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
-				},
-				_react2.default.createElement(Trunk, { x: "0", y: "-4", width: "1", height: "4" }),
-				_react2.default.createElement("polygon", {
-					fill: "url(#" + LEAF_GRADIENT_ID + ")",
-					points: "-0.5 -2 1.5 -2 2.5 -4 0.5 -8 -1.5 -4"
-				})
-			);
-		}, _temp3;
-	}
-
-}
-
-class Fir extends _react2.default.PureComponent {
-	constructor(...args) {
-		var _temp4;
-
-		return _temp4 = super(...args), this.render = () => {
-			const { x, y } = this.props;
-			//Everything in the g element is positioned relative to the current transformation matrix
-			return _react2.default.createElement(
-				"g",
-				{
-					className: "fir",
-					transform: "translate(" + x + "," + y + ")",
-					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
-				},
-				_react2.default.createElement(Trunk, { x: "0", y: "-4", width: "1", height: "4" }),
-				_react2.default.createElement("polygon", {
-					fill: "url(#" + LEAF_GRADIENT_ID + ")",
-					points: "-1.5 -2.5 2.5 -2.5 1.5 -5 2.5 -5 0.5 -8 -1.5 -5 -0.5 -5"
-				})
-			);
-		}, _temp4;
-	}
-
-}
-
-class Forest extends _react2.default.PureComponent {
-	constructor(...args) {
-		var _temp5;
-
-		return _temp5 = super(...args), this.render = () => {
-			const { coordinates, treeType = "mixed" } = this.props;
-
-			return _react2.default.createElement(
-				"g",
-				{ className: "forest" },
-				_react2.default.createElement(
-					"defs",
-					null,
-					_react2.default.createElement(
-						"linearGradient",
-						{
-							x1: "0%",
-							y1: "50%",
-							x2: "100%",
-							y2: "50%",
-							id: LEAF_GRADIENT_ID
-						},
-						_react2.default.createElement("stop", { stopColor: "#8CBE50", offset: "0%" }),
-						_react2.default.createElement("stop", { stopColor: "#78A050", offset: "100%" })
-					),
-					_react2.default.createElement(
-						"linearGradient",
-						{
-							x1: "0%",
-							y1: "50%",
-							x2: "100%",
-							y2: "50%",
-							id: TRUNK_GRADIENT_ID
-						},
-						_react2.default.createElement("stop", { stopColor: "#C37850", offset: "0%" }),
-						_react2.default.createElement("stop", { stopColor: "#F39C12", offset: "100%" })
-					)
-				),
-				coordinates.sort(({ y: y1 }, { y: y2 }) => {
-					return y1 - y2;
-				}).map(({ x, y }, index) => {
-					let type = treeType;
-					if (type === "mixed") {
-						const rnd = Math.random();
-						if (rnd < 1 / 3) {
-							type = OvalTree;
-						} else if (rnd < 2 / 3) {
-							type = AngularTree;
-						} else {
-							type = Fir;
-						}
-					}
-
-					return _react2.default.createElement(type, { key: index, x, y });
-				})
-			);
-		}, _temp5;
-	}
-
-}
-
-exports.default = Forest;
-
-/***/ }),
 /* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1854,9 +1738,289 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(2);
+var _utilities = __webpack_require__(1);
 
-var _constants = __webpack_require__(1);
+var _constants = __webpack_require__(2);
+
+var _Angular = __webpack_require__(35);
+
+var _Angular2 = _interopRequireDefault(_Angular);
+
+var _Fir = __webpack_require__(36);
+
+var _Fir2 = _interopRequireDefault(_Fir);
+
+var _Oval = __webpack_require__(37);
+
+var _Oval2 = _interopRequireDefault(_Oval);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class GroundDecoration extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { coordinates, treeType = "mixed" } = this.props;
+
+			return _react2.default.createElement(
+				"g",
+				{ className: "forest" },
+				_react2.default.createElement("defs", null),
+				coordinates.sort(({ y: y1 }, { y: y2 }) => {
+					return y1 - y2;
+				}).map(({ x, y }, index) => {
+					let type = treeType;
+					if (type === "mixed") {
+						const rnd = Math.random();
+						if (rnd < 1 / 3) {
+							type = _Oval2.default;
+						} else if (rnd < 2 / 3) {
+							type = _Angular2.default;
+						} else {
+							type = _Fir2.default;
+						}
+					}
+
+					return _react2.default.createElement(type, { key: index, x, y });
+				})
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = GroundDecoration;
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+var _constants = __webpack_require__(2);
+
+var _Trunk = __webpack_require__(3);
+
+var _Trunk2 = _interopRequireDefault(_Trunk);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const LEAF_GRADIENT_ID = (0, _utilities.genUID)();
+
+class AngularTree extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { x, y } = this.props;
+			return _react2.default.createElement(
+				"g",
+				{
+					className: "angular",
+					transform: "translate(" + x + "," + y + ")",
+					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+				},
+				_react2.default.createElement(
+					"defs",
+					null,
+					_react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "0%",
+							y1: "50%",
+							x2: "100%",
+							y2: "50%",
+							id: LEAF_GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#8CBE50", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#78A050", offset: "100%" })
+					)
+				),
+				_react2.default.createElement(_Trunk2.default, { x: "0", y: "-4", width: "1", height: "4" }),
+				_react2.default.createElement("polygon", {
+					fill: "url(#" + LEAF_GRADIENT_ID + ")",
+					points: "-0.5 -2 1.5 -2 2.5 -4 0.5 -8 -1.5 -4"
+				})
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = AngularTree;
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+var _constants = __webpack_require__(2);
+
+var _Trunk = __webpack_require__(3);
+
+var _Trunk2 = _interopRequireDefault(_Trunk);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const LEAF_GRADIENT_ID = (0, _utilities.genUID)();
+
+class OvalTree extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { x, y } = this.props;
+			return _react2.default.createElement(
+				"g",
+				{
+					className: "fir",
+					transform: "translate(" + x + "," + y + ")",
+					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+				},
+				_react2.default.createElement(
+					"defs",
+					null,
+					_react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "0%",
+							y1: "50%",
+							x2: "100%",
+							y2: "50%",
+							id: LEAF_GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#8CBE50", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#78A050", offset: "100%" })
+					)
+				),
+				_react2.default.createElement(_Trunk2.default, { x: "0", y: "-4", width: "1", height: "4" }),
+				_react2.default.createElement("polygon", {
+					fill: "url(#" + LEAF_GRADIENT_ID + ")",
+					points: "-1.5 -2.5 2.5 -2.5 1.5 -5 2.5 -5 0.5 -8 -1.5 -5 -0.5 -5"
+				})
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = OvalTree;
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+var _constants = __webpack_require__(2);
+
+var _Trunk = __webpack_require__(3);
+
+var _Trunk2 = _interopRequireDefault(_Trunk);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const LEAF_GRADIENT_ID = (0, _utilities.genUID)();
+
+class OvalTree extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { x, y } = this.props;
+			return _react2.default.createElement(
+				"g",
+				{
+					className: "oval",
+					transform: "translate(" + x + "," + y + ")",
+					filter: "url(#" + _constants.DROP_SHADOW_ID + ")"
+				},
+				_react2.default.createElement(
+					"defs",
+					null,
+					_react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "0%",
+							y1: "50%",
+							x2: "100%",
+							y2: "50%",
+							id: LEAF_GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#8CBE50", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#78A050", offset: "100%" })
+					)
+				),
+				_react2.default.createElement(_Trunk2.default, { x: "0", y: "-4", width: "1", height: "4" }),
+				_react2.default.createElement("path", {
+					d: "M0.75,-2 C1.15,-2 2.35,-2.5 2.35,-4 C2.35,-6 1.35,-8 0.65,-8 C-0.15,-8 -1.25,-6 -1.25,-4 C-1.25,-2.5 -0.25,-2 0.75,-2 Z",
+					fill: "url(#" + LEAF_GRADIENT_ID + ")"
+				})
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = OvalTree;
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+var _constants = __webpack_require__(2);
+
+var _DefaultCloud = __webpack_require__(39);
+
+var _DefaultCloud2 = _interopRequireDefault(_DefaultCloud);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1902,7 +2066,8 @@ class Sky extends _react2.default.PureComponent {
 					width: _constants.SVG_WIDTH,
 					height: _constants.SVG_HEIGHT,
 					fill: "url(#" + GRADIENT_ID + ")"
-				})
+				}),
+				_react2.default.createElement(_DefaultCloud2.default, { x: 50, y: 10 })
 			);
 		}, _temp;
 	}
@@ -1912,7 +2077,7 @@ class Sky extends _react2.default.PureComponent {
 exports.default = Sky;
 
 /***/ }),
-/* 35 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1926,9 +2091,74 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(2);
+var _utilities = __webpack_require__(1);
 
-var _constants = __webpack_require__(1);
+var _constants = __webpack_require__(2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Cloud extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { x, y } = this.props;
+
+			return _react2.default.createElement(
+				"g",
+				{
+					className: "cloud",
+					filter: "url(#" + _constants.DROP_SHADOW_ID + ")",
+					transform: "translate(" + x + "," + y + ")"
+				},
+				_react2.default.createElement("path", {
+					d: "M12,3 C12,1.5 11,0.6 9.8,0.65 C9.5,0.65 9.3,0.7 9,0.8 C8.5,0.3 7.9,0 7,0 C6.2,0 5.4,0.5 5,1.2 C4.5,0.8 4,0.7 3.5,0.7 C3,0.7 2.4,0.9 2,1.3 C1.9,1.3 1.7,1.2 1.6,1.2 C0.6,1.2 0,2 0,3 L12,3 Z",
+					fill: "#FFFFFF"
+				})
+			);
+		}, _temp;
+	}
+	/*componentDidMount = () => {
+ 	const windStrength = this.props.windStrength
+ 		? this.props.windStrength
+ 		: 7500;
+ 	const moveInterval = this.props.moveInterval
+ 		? this.props.moveInterval
+ 		: 100;
+ 		this.moveInterval = setInterval(() => {
+ 		this.setState({
+ 			dx: this.state.dx + SVG_WIDTH / windStrength
+ 		});
+ 	}, moveInterval);
+ };
+ 	componentWillUnmount = () => {
+ 	if (this.moveInterval) {
+ 		clearInterval(this.moveInterval);
+ 	}
+ };*/
+
+}
+
+exports.default = Cloud;
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+var _constants = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2017,7 +2247,7 @@ class Sun extends _react2.default.PureComponent {
 exports.default = Sun;
 
 /***/ }),
-/* 36 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2031,9 +2261,85 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _utilities = __webpack_require__(2);
+var _utilities = __webpack_require__(1);
 
-var _constants = __webpack_require__(1);
+var _constants = __webpack_require__(2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const HILLS_GRADIENT_ID = (0, _utilities.genUID)();
+
+class Hills extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			return _react2.default.createElement(
+				"g",
+				{ className: "hills", filter: "url(#" + _constants.DROP_SHADOW_ID + ")" },
+				_react2.default.createElement(
+					"defs",
+					null,
+					_react2.default.createElement(
+						"linearGradient",
+						{
+							x1: "0%",
+							y1: "50%",
+							x2: "100%",
+							y2: "50%",
+							id: HILLS_GRADIENT_ID
+						},
+						_react2.default.createElement("stop", { stopColor: "#1E824C", offset: "0%" }),
+						_react2.default.createElement("stop", { stopColor: "#26A65B", offset: "100%" })
+					)
+				),
+				_react2.default.createElement("ellipse", {
+					cx: "15",
+					cy: _constants.GROUND_Y + 10,
+					rx: "20",
+					ry: "15",
+					fill: "url(#" + HILLS_GRADIENT_ID + ")"
+				}),
+				_react2.default.createElement("ellipse", {
+					cx: "85",
+					cy: _constants.GROUND_Y + 10,
+					rx: "20",
+					ry: "15",
+					fill: "url(#" + HILLS_GRADIENT_ID + ")"
+				}),
+				_react2.default.createElement("ellipse", {
+					cx: "50",
+					cy: _constants.GROUND_Y + 10,
+					rx: "30",
+					ry: "20",
+					fill: "url(#" + HILLS_GRADIENT_ID + ")"
+				})
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = Hills;
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilities = __webpack_require__(1);
+
+var _constants = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2084,11 +2390,11 @@ class DropShadowFilter extends _react2.default.PureComponent {
 exports.default = DropShadowFilter;
 
 /***/ }),
-/* 37 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const path = __webpack_require__(3);
-const webpack = __webpack_require__(5);
+const path = __webpack_require__(4);
+const webpack = __webpack_require__(6);
 
 process.traceDeprecation = true; //https://github.com/webpack/loader-utils/issues/56
 
@@ -2214,13 +2520,13 @@ module.exports = {
 
 
 /***/ }),
-/* 38 */
+/* 44 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-dev-middleware");
 
 /***/ }),
-/* 39 */
+/* 45 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-hot-middleware");

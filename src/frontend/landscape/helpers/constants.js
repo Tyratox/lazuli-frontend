@@ -1,5 +1,7 @@
 //define constants here because many of them depend on each other
 
+export const ANIMATION_FPS_CAP = 30;
+
 /*
  ####  #    #  ####  
 #      #    # #    # 
@@ -36,9 +38,17 @@ export const CLOCK_DISTANCE_TO_LABEL = 1.5;
 #    # #   #    #   
  ####  #    #   # 
  */
-
 export const SKY_X = 0;
 export const SKY_Y = 0;
+export const SKY_WIDTH = SVG_WIDTH;
+export const SKY_HEIGHT = SVG_HEIGHT / 2;
+export const SKY_CLOUD_COUNT = 2;
+
+export const MIN_WIND_STRENGTH = 2;
+export const MAX_WIND_STRENGTH = 5;
+
+export const CLOUD_MOVE_INTERVAL = 25;
+
 export const SKY_GRADIENT_STOPS = {
 	day: {
 		6: {
@@ -203,8 +213,7 @@ export const calculateSkyGradient = (hours = 0, day = true) => {
  */
 
 export const SUN_RADIUS = 3;
-export const SUN_ANIMATION_DURATION = 1000;
-export const SUN_ANIMATION_STEPS = 200;
+export const SUN_ANIMATION_DURATION = 4000;
 
 /*
  ####  #####   ####  #    # #    # #####  
@@ -304,16 +313,15 @@ export const calculateSunPositionInAnimation = passed => {
 				? 0
 				: VIEWPORT_START_RAD +
 					13 * HOUR_STEP +
-					2 * HOUR_STEP / SUN_ANIMATION_DURATION * passed;
+					4 * HOUR_STEP / SUN_ANIMATION_DURATION * passed;
 	} else {
 		sunPosRad =
-			passed == 0
-				? 0
-				: VIEWPORT_START_RAD +
-					2 *
-						HOUR_STEP /
-						SUN_ANIMATION_DURATION *
-						(passed - SUN_ANIMATION_DURATION / 2);
+			VIEWPORT_START_RAD -
+			HOUR_STEP +
+			4 *
+				HOUR_STEP /
+				SUN_ANIMATION_DURATION *
+				(passed - SUN_ANIMATION_DURATION / 2);
 	}
 
 	return {
@@ -430,7 +438,6 @@ const intersectsRiver = ({ x, y }, riverCoordinates = []) => {
 				(riverCoordinates[i].y - riverCoordinates[i + 1].y) /
 					(riverCoordinates[i].x - riverCoordinates[i + 1].x)
 			);
-			window.rotate = rotatePoint;
 			//now we have to rotate two points of the rectangle and the trunk coordinate back
 			const coordinate = rotatePoint({ x, y }, -angle, { x: 0, y: 0 });
 			const rectPoint1 = rotatePoint(
@@ -484,7 +491,7 @@ export const generatePlantCoordinates = (count = 0, riverCoordinates = []) => {
 		let x, y;
 		while (!x || !y || intersectsRiver({ x, y }, riverCoordinates)) {
 			x = Math.random() * GROUND_WIDTH;
-			y = GROUND_Y + Math.random() * GROUND_HEIGHT;
+			y = GROUND_Y + 5 + Math.random() * (GROUND_HEIGHT - 10);
 		}
 		treeCoordinates.push({
 			x,
