@@ -18,29 +18,12 @@ const context = {
 	})
 };
 
-class ContextProvider extends React.Component {
-	getChildContext() {
-		return {
-			insertCss: styles => styles._insertCss()
-		};
-	}
-	render() {
-		return React.Children.only(this.props.children);
-	}
-}
-
-ContextProvider.childContextTypes = {
-	insertCss: PropTypes.func.isRequired
-};
-
 const render = (router, location) => {
 	return router
 		.resolve({ pathname: location.pathname, ...context })
 		.then(result => {
 			ReactDOM.render(
-				<AppContainer>
-					<ContextProvider>{result.component}</ContextProvider>
-				</AppContainer>,
+				<AppContainer>{result.component}</AppContainer>,
 				document.getElementById("root"),
 				() => {
 					document.title = result.title;

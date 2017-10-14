@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 8);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -96,6 +96,8 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 //define constants here because many of them depend on each other
+
+const ANIMATION_FPS_CAP = exports.ANIMATION_FPS_CAP = 30;
 
 /*
  ####  #    #  ####  
@@ -133,9 +135,17 @@ const CLOCK_DISTANCE_TO_LABEL = exports.CLOCK_DISTANCE_TO_LABEL = 1.5;
 #    # #   #    #   
  ####  #    #   # 
  */
-
 const SKY_X = exports.SKY_X = 0;
 const SKY_Y = exports.SKY_Y = 0;
+const SKY_WIDTH = exports.SKY_WIDTH = SVG_WIDTH;
+const SKY_HEIGHT = exports.SKY_HEIGHT = SVG_HEIGHT / 2;
+const SKY_CLOUD_COUNT = exports.SKY_CLOUD_COUNT = 2;
+
+const MIN_WIND_STRENGTH = exports.MIN_WIND_STRENGTH = 1;
+const MAX_WIND_STRENGTH = exports.MAX_WIND_STRENGTH = 2;
+
+const CLOUD_MOVE_INTERVAL = exports.CLOUD_MOVE_INTERVAL = 25;
+
 const SKY_GRADIENT_STOPS = exports.SKY_GRADIENT_STOPS = {
 	day: {
 		6: {
@@ -284,8 +294,7 @@ const calculateSkyGradient = exports.calculateSkyGradient = (hours = 0, day = tr
  */
 
 const SUN_RADIUS = exports.SUN_RADIUS = 3;
-const SUN_ANIMATION_DURATION = exports.SUN_ANIMATION_DURATION = 1000;
-const SUN_ANIMATION_STEPS = exports.SUN_ANIMATION_STEPS = 200;
+const SUN_ANIMATION_DURATION = exports.SUN_ANIMATION_DURATION = 4000;
 
 /*
  ####  #####   ####  #    # #    # #####  
@@ -376,9 +385,9 @@ const calculateSunPositionInAnimation = exports.calculateSunPositionInAnimation 
 	//calculate the sun's position
 	let sunPosRad = 0;
 	if (passed < SUN_ANIMATION_DURATION / 2) {
-		sunPosRad = passed == 0 ? 0 : VIEWPORT_START_RAD + 13 * HOUR_STEP + 2 * HOUR_STEP / SUN_ANIMATION_DURATION * passed;
+		sunPosRad = passed == 0 ? 0 : VIEWPORT_START_RAD + 13 * HOUR_STEP + 4 * HOUR_STEP / SUN_ANIMATION_DURATION * passed;
 	} else {
-		sunPosRad = passed == 0 ? 0 : VIEWPORT_START_RAD + 2 * HOUR_STEP / SUN_ANIMATION_DURATION * (passed - SUN_ANIMATION_DURATION / 2);
+		sunPosRad = VIEWPORT_START_RAD - HOUR_STEP + 4 * HOUR_STEP / SUN_ANIMATION_DURATION * (passed - SUN_ANIMATION_DURATION / 2);
 	}
 
 	return {
@@ -523,6 +532,12 @@ const generatePlantCoordinates = exports.generatePlantCoordinates = (count = 0, 
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("styled-components");
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -583,44 +598,44 @@ class Trunk extends _react2.default.PureComponent {
 exports.default = Trunk;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 module.exports = require("path");
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports) {
 
 module.exports = {"KEY_PATH":"./keys/server.key","CERT_PATH":"./keys/server.crt","HTTP_PORT":8080,"API_URL":"","CLIENT_ID":1,"CLIENT_SECRET":""}
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack");
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(8);
+module.exports = __webpack_require__(9);
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const http2 = __webpack_require__(9);
-const express = __webpack_require__(10);
-const compression = __webpack_require__(11);
-const promiseRequest = __webpack_require__(12);
+const http2 = __webpack_require__(10);
+const express = __webpack_require__(11);
+const compression = __webpack_require__(12);
+const promiseRequest = __webpack_require__(13);
 
-const path = __webpack_require__(4);
-const fs = __webpack_require__(13);
+const path = __webpack_require__(5);
+const fs = __webpack_require__(14);
 
 const {
 	KEY_PATH,
@@ -629,8 +644,8 @@ const {
 	API_URL,
 	CLIENT_ID,
 	CLIENT_SECRET
-} = __webpack_require__(5);
-const page = __webpack_require__(14);
+} = __webpack_require__(6);
+const page = __webpack_require__(15);
 
 const expressServer = express();
 const key = fs.readFileSync(KEY_PATH);
@@ -712,15 +727,15 @@ expressServer.get("/oauth-callback", (request, response) => {
 });
 
 if (process.env.NODE_ENV === "development") {
-	const webpack = __webpack_require__(6);
-	const webpackConfig = __webpack_require__(43);
+	const webpack = __webpack_require__(7);
+	const webpackConfig = __webpack_require__(39);
 	const compiler = webpack(webpackConfig);
 
-	expressServer.use(__webpack_require__(44)(compiler, {
+	expressServer.use(__webpack_require__(40)(compiler, {
 		publicPath: webpackConfig.output.publicPath
 	}));
 
-	expressServer.use(__webpack_require__(45)(compiler));
+	expressServer.use(__webpack_require__(41)(compiler));
 
 	expressServer.get("*", (request, response) => {
 		return renderSite(request, response);
@@ -761,37 +776,37 @@ if (process.env.NODE_ENV === "development") {
 }
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("spdy");
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = require("compression");
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports) {
 
 module.exports = require("request-promise-native");
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -801,13 +816,11 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(15);
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
 var _server = __webpack_require__(16);
 
 var _server2 = _interopRequireDefault(_server);
+
+var _styledComponents = __webpack_require__(3);
 
 var _universalRouter = __webpack_require__(17);
 
@@ -825,25 +838,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const router = new _universalRouter2.default(_routes2.default);
 
-const css = new Set(); // CSS for all rendered React components
-
-class ContextProvider extends _react2.default.Component {
-	getChildContext() {
-		return {
-			insertCss: (...styles) => styles.forEach(style => css.add(style._getCss()))
-		};
-	}
-	render() {
-		return _react2.default.Children.only(this.props.children);
-	}
-}
-
-ContextProvider.childContextTypes = {
-	insertCss: _propTypes2.default.func.isRequired
-};
-
 module.exports = request => {
 	return router.resolve({ pathname: request.url }).then(({ title, component }) => {
+		const sheet = new _styledComponents.ServerStyleSheet();
+
+		sheet.collectStyles(component);
+
+		const styles = sheet.getStyleTags();
+
 		return Promise.resolve(_server2.default.renderToString(_react2.default.createElement(
 			"html",
 			null,
@@ -857,11 +859,9 @@ module.exports = request => {
 					name: "viewport",
 					content: "width=device-width, initial-scale=1.0"
 				}),
-				_react2.default.createElement(
-					"style",
-					{ type: "text/css" },
-					[...css].join("")
-				),
+				_react2.default.createElement("link", { href: "/assets/styles/fonts.css", rel: "stylesheet" }),
+				_react2.default.createElement("link", { href: "/assets/styles/normalize.css", rel: "stylesheet" }),
+				_react2.default.createElement("meta", { name: "css-placeholder" }),
 				_react2.default.createElement(
 					"title",
 					null,
@@ -874,23 +874,13 @@ module.exports = request => {
 				_react2.default.createElement(
 					"div",
 					{ id: "root" },
-					_react2.default.createElement(
-						ContextProvider,
-						null,
-						component
-					)
+					component
 				),
 				_react2.default.createElement("script", { src: "/bundle.js" })
 			)
-		)));
+		)).replace('<meta name="css-placeholder"/>', styles));
 	}).catch(console.log);
 };
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports) {
-
-module.exports = require("prop-types");
 
 /***/ }),
 /* 16 */
@@ -923,7 +913,7 @@ var _isomorphicFetch2 = _interopRequireDefault(_isomorphicFetch);
 
 var _relayRuntime = __webpack_require__(20);
 
-var _config = __webpack_require__(5);
+var _config = __webpack_require__(6);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1039,319 +1029,51 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _withStyles = __webpack_require__(23);
+var _styledComponents = __webpack_require__(3);
 
-var _withStyles2 = _interopRequireDefault(_withStyles);
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
-var _App = __webpack_require__(24);
-
-var _App2 = _interopRequireDefault(_App);
-
-var _Landscape = __webpack_require__(30);
+var _Landscape = __webpack_require__(23);
 
 var _Landscape2 = _interopRequireDefault(_Landscape);
 
+var _Modal = __webpack_require__(36);
+
+var _Modal2 = _interopRequireDefault(_Modal);
+
+var _logo = __webpack_require__(37);
+
+var _logo2 = _interopRequireDefault(_logo);
+
+var _constants = __webpack_require__(38);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-if (false) {
-	module.hot.accept("./App.scss", function () {
-		require("./App.scss");
-	});
-}
+const Title = _styledComponents2.default.h1`color: ${_constants.colorPrimary};`;
 
 const App = ({ api }) => {
 	return _react2.default.createElement(
 		"div",
 		null,
-		_react2.default.createElement(_Landscape2.default, null)
+		_react2.default.createElement(_Landscape2.default, null),
+		_react2.default.createElement(
+			_Modal2.default,
+			null,
+			_react2.default.createElement(_logo2.default, null),
+			_react2.default.createElement(
+				Title,
+				null,
+				"Willkommen, Nico"
+			),
+			"he"
+		)
 	);
 };
 
-exports.default = (0, _withStyles2.default)(_App2.default)(App);
+exports.default = App;
 
 /***/ }),
 /* 23 */
-/***/ (function(module, exports) {
-
-module.exports = require("isomorphic-style-loader/lib/withStyles");
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-    var content = __webpack_require__(25);
-    var insertCss = __webpack_require__(27);
-
-    if (typeof content === 'string') {
-      content = [[module.i, content, '']];
-    }
-
-    module.exports = content.locals || {};
-    module.exports._getContent = function() { return content; };
-    module.exports._getCss = function() { return content.toString(); };
-    module.exports._insertCss = function(options) { return insertCss(content, options) };
-    
-    // Hot Module Replacement
-    // https://webpack.github.io/docs/hot-module-replacement
-    // Only activated in browser context
-    if (false) {
-      var removeCss = function() {};
-      module.hot.accept("!!../../node_modules/css-loader/index.js??ref--2-1!../../node_modules/postcss-loader/lib/index.js!../../node_modules/sass-loader/lib/loader.js!./App.scss", function() {
-        content = require("!!../../node_modules/css-loader/index.js??ref--2-1!../../node_modules/postcss-loader/lib/index.js!../../node_modules/sass-loader/lib/loader.js!./App.scss");
-
-        if (typeof content === 'string') {
-          content = [[module.id, content, '']];
-        }
-
-        removeCss = insertCss(content, { replace: true });
-      });
-      module.hot.dispose(function() { removeCss(); });
-    }
-  
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(26)(undefined);
-// imports
-
-
-// module
-exports.push([module.i, "html,\nbody {\n  margin: 0;\n  padding: 0; }\n\n.src-frontend-___App__background___1h6Y0 {\n  -webkit-filter: drop-shadow(-1px -1px 2px rgba(0, 0, 0, 0.5));\n          filter: drop-shadow(-1px -1px 2px rgba(0, 0, 0, 0.5)); }\n", ""]);
-
-// exports
-exports.locals = {
-	"background": "src-frontend-___App__background___1h6Y0"
-};
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-// css base code, injected by the css-loader
-module.exports = function(useSourceMap) {
-	var list = [];
-
-	// return the list of modules as css string
-	list.toString = function toString() {
-		return this.map(function (item) {
-			var content = cssWithMappingToString(item, useSourceMap);
-			if(item[2]) {
-				return "@media " + item[2] + "{" + content + "}";
-			} else {
-				return content;
-			}
-		}).join("");
-	};
-
-	// import a list of modules into the list
-	list.i = function(modules, mediaQuery) {
-		if(typeof modules === "string")
-			modules = [[null, modules, ""]];
-		var alreadyImportedModules = {};
-		for(var i = 0; i < this.length; i++) {
-			var id = this[i][0];
-			if(typeof id === "number")
-				alreadyImportedModules[id] = true;
-		}
-		for(i = 0; i < modules.length; i++) {
-			var item = modules[i];
-			// skip already imported module
-			// this implementation is not 100% perfect for weird media query combinations
-			//  when a module is imported multiple times with different media queries.
-			//  I hope this will never occur (Hey this way we have smaller bundles)
-			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-				if(mediaQuery && !item[2]) {
-					item[2] = mediaQuery;
-				} else if(mediaQuery) {
-					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-				}
-				list.push(item);
-			}
-		}
-	};
-	return list;
-};
-
-function cssWithMappingToString(item, useSourceMap) {
-	var content = item[1] || '';
-	var cssMapping = item[3];
-	if (!cssMapping) {
-		return content;
-	}
-
-	if (useSourceMap && typeof btoa === 'function') {
-		var sourceMapping = toComment(cssMapping);
-		var sourceURLs = cssMapping.sources.map(function (source) {
-			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
-		});
-
-		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
-	}
-
-	return [content].join('\n');
-}
-
-// Adapted from convert-source-map (MIT)
-function toComment(sourceMap) {
-	// eslint-disable-next-line no-undef
-	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
-	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
-
-	return '/*# ' + data + ' */';
-}
-
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _stringify = __webpack_require__(28);
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _slicedToArray2 = __webpack_require__(29);
-
-var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Isomorphic CSS style loader for Webpack
- *
- * Copyright © 2015-present Kriasoft, LLC. All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.txt file in the root directory of this source tree.
- */
-
-var prefix = 's';
-var inserted = {};
-
-// Base64 encoding and decoding - The "Unicode Problem"
-// https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_Unicode_Problem
-function b64EncodeUnicode(str) {
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
-    return String.fromCharCode('0x' + p1);
-  }));
-}
-
-/**
- * Remove style/link elements for specified node IDs
- * if they are no longer referenced by UI components.
- */
-function removeCss(ids) {
-  ids.forEach(function (id) {
-    if (--inserted[id] <= 0) {
-      var elem = document.getElementById(prefix + id);
-      if (elem) {
-        elem.parentNode.removeChild(elem);
-      }
-    }
-  });
-}
-
-/**
- * Example:
- *   // Insert CSS styles object generated by `css-loader` into DOM
- *   var removeCss = insertCss([[1, 'body { color: red; }']]);
- *
- *   // Remove it from the DOM
- *   removeCss();
- */
-function insertCss(styles) {
-  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      _ref$replace = _ref.replace,
-      replace = _ref$replace === undefined ? false : _ref$replace,
-      _ref$prepend = _ref.prepend,
-      prepend = _ref$prepend === undefined ? false : _ref$prepend;
-
-  var ids = [];
-  for (var i = 0; i < styles.length; i++) {
-    var _styles$i = (0, _slicedToArray3.default)(styles[i], 4),
-        moduleId = _styles$i[0],
-        css = _styles$i[1],
-        media = _styles$i[2],
-        sourceMap = _styles$i[3];
-
-    var id = moduleId + '-' + i;
-
-    ids.push(id);
-
-    if (inserted[id]) {
-      if (!replace) {
-        inserted[id]++;
-        continue;
-      }
-    }
-
-    inserted[id] = 1;
-
-    var elem = document.getElementById(prefix + id);
-    var create = false;
-
-    if (!elem) {
-      create = true;
-
-      elem = document.createElement('style');
-      elem.setAttribute('type', 'text/css');
-      elem.id = prefix + id;
-
-      if (media) {
-        elem.setAttribute('media', media);
-      }
-    }
-
-    var cssText = css;
-    if (sourceMap && typeof btoa === 'function') {
-      // skip IE9 and below, see http://caniuse.com/atob-btoa
-      cssText += '\n/*# sourceMappingURL=data:application/json;base64,' + b64EncodeUnicode((0, _stringify2.default)(sourceMap)) + '*/';
-      cssText += '\n/*# sourceURL=' + sourceMap.file + '?' + id + '*/';
-    }
-
-    if ('textContent' in elem) {
-      elem.textContent = cssText;
-    } else {
-      elem.styleSheet.cssText = cssText;
-    }
-
-    if (create) {
-      if (prepend) {
-        document.head.insertBefore(elem, document.head.childNodes[0]);
-      } else {
-        document.head.appendChild(elem);
-      }
-    }
-  }
-
-  return removeCss.bind(null, ids);
-}
-
-module.exports = insertCss;
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports) {
-
-module.exports = require("babel-runtime/core-js/json/stringify");
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports) {
-
-module.exports = require("babel-runtime/helpers/slicedToArray");
-
-/***/ }),
-/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1365,27 +1087,27 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Clock = __webpack_require__(31);
+var _Clock = __webpack_require__(24);
 
 var _Clock2 = _interopRequireDefault(_Clock);
 
-var _Ground = __webpack_require__(32);
+var _Ground = __webpack_require__(25);
 
 var _Ground2 = _interopRequireDefault(_Ground);
 
-var _Sky = __webpack_require__(38);
+var _Sky = __webpack_require__(31);
 
 var _Sky2 = _interopRequireDefault(_Sky);
 
-var _Sun = __webpack_require__(40);
+var _Sun = __webpack_require__(33);
 
 var _Sun2 = _interopRequireDefault(_Sun);
 
-var _Hills = __webpack_require__(41);
+var _Hills = __webpack_require__(34);
 
 var _Hills2 = _interopRequireDefault(_Hills);
 
-var _DropShadowFilter = __webpack_require__(42);
+var _DropShadowFilter = __webpack_require__(35);
 
 var _DropShadowFilter2 = _interopRequireDefault(_DropShadowFilter);
 
@@ -1400,7 +1122,9 @@ class Landscape extends _react2.default.PureComponent {
 		_initialiseProps.call(this);
 
 		const d = new Date();
-		this.state = { hours: d.getHours() + d.getMinutes() / 60 };
+		this.state = {
+			hours: d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600
+		};
 	}
 
 	render() {
@@ -1435,18 +1159,32 @@ class Landscape extends _react2.default.PureComponent {
 }
 
 var _initialiseProps = function () {
-	this.animateSun = (passed = 0) => {
-		if (passed >= _constants.SUN_ANIMATION_DURATION) {
-			clearTimeout(this.morning);
-			this.setState({ overrideSunX: undefined, overrideSunY: undefined });
-			return;
-		}
-		const { x, y } = (0, _constants.calculateSunPositionInAnimation)(passed);
-		this.setState({ overrideSunX: x, overrideSunY: y });
+	this.animateSun = () => {
+		const now = Date.now();
+		let last = this.lastMovedClouds;
+		const passed = now - last;
 
-		this.morning = setTimeout(() => {
-			this.animateSun(passed + _constants.SUN_ANIMATION_DURATION / _constants.SUN_ANIMATION_STEPS);
-		}, _constants.SUN_ANIMATION_DURATION / _constants.SUN_ANIMATION_STEPS);
+		if (!last) {
+			last = this.lastMovedClouds = Date.now();
+		}
+
+		if (passed > 1 / _constants.ANIMATION_FPS_CAP * 1000) {
+			const { x, y } = (0, _constants.calculateSunPositionInAnimation)(this.totalAnimationTimePassed);
+			this.setState({ overrideSunX: x, overrideSunY: y });
+
+			this.lastMovedClouds = now;
+			this.totalAnimationTimePassed += passed;
+
+			if (this.totalAnimationTimePassed >= _constants.SUN_ANIMATION_DURATION) {
+				this.animate = false;
+			}
+		}
+
+		if (this.animate) {
+			window.requestAnimationFrame(this.animateSun);
+		} else {
+			this.setState({ overrideSunX: undefined, overrideSunY: undefined });
+		}
 	};
 
 	this.componentDidMount = () => {
@@ -1456,25 +1194,27 @@ var _initialiseProps = function () {
   }, 30000);*/
 		this.updateInterval = setInterval(() => {
 			const d = new Date();
-			let hours = d.getMinutes() % 24 + d.getSeconds() / 60 + d.getMilliseconds() / 60000;
-			if (this.state.hours < 6 && hours >= 6 || this.state.hours < 18 && hours >= 18) {
-				this.animateSun();
+			let hours = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
+
+			if (this.state.hours < 6 && hours >= 6 && hours < 7 || this.state.hours < 18 && hours >= 18 && hours < 19) {
+				this.animate = true;
+				this.totalAnimationTimePassed = 0;
+				window.requestAnimationFrame(this.animateSun);
 			}
+
 			this.setState({ hours });
 		}, 100);
 	};
 
 	this.componentWillUnmount = () => {
-		if (this.updateInterval) {
-			clearInterval(this.updateInterval);
-		}
+		this.animate = false;
 	};
 };
 
 exports.default = Landscape;
 
 /***/ }),
-/* 31 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1599,7 +1339,7 @@ class Clock extends _react2.default.PureComponent {
 exports.default = Clock;
 
 /***/ }),
-/* 32 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1617,11 +1357,11 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _River = __webpack_require__(33);
+var _River = __webpack_require__(26);
 
 var _River2 = _interopRequireDefault(_River);
 
-var _GroundDecoration = __webpack_require__(34);
+var _GroundDecoration = __webpack_require__(27);
 
 var _GroundDecoration2 = _interopRequireDefault(_GroundDecoration);
 
@@ -1677,7 +1417,7 @@ class Ground extends _react2.default.PureComponent {
 exports.default = Ground;
 
 /***/ }),
-/* 33 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1724,7 +1464,7 @@ class River extends _react2.default.PureComponent {
 exports.default = River;
 
 /***/ }),
-/* 34 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1742,15 +1482,15 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _Angular = __webpack_require__(35);
+var _Angular = __webpack_require__(28);
 
 var _Angular2 = _interopRequireDefault(_Angular);
 
-var _Fir = __webpack_require__(36);
+var _Fir = __webpack_require__(29);
 
 var _Fir2 = _interopRequireDefault(_Fir);
 
-var _Oval = __webpack_require__(37);
+var _Oval = __webpack_require__(30);
 
 var _Oval2 = _interopRequireDefault(_Oval);
 
@@ -1793,7 +1533,7 @@ class GroundDecoration extends _react2.default.PureComponent {
 exports.default = GroundDecoration;
 
 /***/ }),
-/* 35 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1811,7 +1551,7 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _Trunk = __webpack_require__(3);
+var _Trunk = __webpack_require__(4);
 
 var _Trunk2 = _interopRequireDefault(_Trunk);
 
@@ -1862,7 +1602,7 @@ class AngularTree extends _react2.default.PureComponent {
 exports.default = AngularTree;
 
 /***/ }),
-/* 36 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1880,7 +1620,7 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _Trunk = __webpack_require__(3);
+var _Trunk = __webpack_require__(4);
 
 var _Trunk2 = _interopRequireDefault(_Trunk);
 
@@ -1931,7 +1671,7 @@ class OvalTree extends _react2.default.PureComponent {
 exports.default = OvalTree;
 
 /***/ }),
-/* 37 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1949,7 +1689,7 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _Trunk = __webpack_require__(3);
+var _Trunk = __webpack_require__(4);
 
 var _Trunk2 = _interopRequireDefault(_Trunk);
 
@@ -2000,7 +1740,7 @@ class OvalTree extends _react2.default.PureComponent {
 exports.default = OvalTree;
 
 /***/ }),
-/* 38 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2010,6 +1750,8 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
@@ -2018,7 +1760,7 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _DefaultCloud = __webpack_require__(39);
+var _DefaultCloud = __webpack_require__(32);
 
 var _DefaultCloud2 = _interopRequireDefault(_DefaultCloud);
 
@@ -2026,12 +1768,71 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const GRADIENT_ID = (0, _utilities.genUID)();
 
-class Sky extends _react2.default.PureComponent {
-	constructor(...args) {
-		var _temp;
+const CLOUD_DESPAWN_MARGIN_LEFT = 15;
 
-		return _temp = super(...args), this.render = () => {
+class Sky extends _react2.default.PureComponent {
+	constructor() {
+		super();
+
+		this.checkClouds = () => {
+			let { clouds } = this.state;
+
+			clouds = clouds.filter(({ x }) => x > -CLOUD_DESPAWN_MARGIN_LEFT && x < _constants.SVG_WIDTH);
+
+			if (clouds.length < _constants.SKY_CLOUD_COUNT) {
+				//spawn new ones
+				for (let i = 0; i < _constants.SKY_CLOUD_COUNT - clouds.length; i++) {
+					const left = Math.random() < 0.5;
+
+					clouds.push({
+						x: left ? -CLOUD_DESPAWN_MARGIN_LEFT : _constants.SVG_WIDTH,
+						y: Math.random() * (_constants.SKY_HEIGHT / 2),
+						windStrength: (left ? 1 : -1) * (_constants.MIN_WIND_STRENGTH + Math.random() * (_constants.MAX_WIND_STRENGTH - _constants.MIN_WIND_STRENGTH))
+					});
+				}
+			}
+
+			this.setState({ clouds });
+		};
+
+		this.moveClouds = () => {
+			const now = Date.now();
+			let last = this.lastMovedClouds;
+			const passed = now - last;
+
+			if (!last) {
+				last = this.lastMovedClouds = Date.now();
+			}
+
+			if (passed > 1 / _constants.ANIMATION_FPS_CAP * 1000) {
+				let { clouds } = this.state;
+
+				clouds = clouds.map(cloud => {
+					return _extends({}, cloud, { x: cloud.x + cloud.windStrength * passed / 1000 });
+				});
+
+				this.setState({ clouds }, this.checkClouds);
+
+				this.lastMovedClouds = now;
+			}
+
+			if (this.animate) {
+				window.requestAnimationFrame(this.moveClouds);
+			}
+		};
+
+		this.componentDidMount = () => {
+			this.animate = true;
+			window.requestAnimationFrame(this.moveClouds);
+		};
+
+		this.componentWillUnmount = () => {
+			this.animate = false;
+		};
+
+		this.render = () => {
 			const { hours = 0, day = true, sunX = 50, sunY = 45 } = this.props;
+			const { clouds } = this.state;
 
 			const gradient = (0, _constants.calculateSkyGradient)(hours, day);
 
@@ -2064,20 +1865,23 @@ class Sky extends _react2.default.PureComponent {
 					x: _constants.SKY_X,
 					y: _constants.SKY_Y,
 					width: _constants.SVG_WIDTH,
-					height: _constants.SVG_HEIGHT,
+					height: _constants.SKY_HEIGHT,
 					fill: "url(#" + GRADIENT_ID + ")"
 				}),
-				_react2.default.createElement(_DefaultCloud2.default, { x: 50, y: 10 })
+				clouds.map(({ x, y }, i) => {
+					return _react2.default.createElement(_DefaultCloud2.default, { key: i, x: x, y: y });
+				})
 			);
-		}, _temp;
-	}
+		};
 
+		this.state = { clouds: [] };
+	}
 }
 
 exports.default = Sky;
 
 /***/ }),
-/* 39 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2118,31 +1922,13 @@ class Cloud extends _react2.default.PureComponent {
 			);
 		}, _temp;
 	}
-	/*componentDidMount = () => {
- 	const windStrength = this.props.windStrength
- 		? this.props.windStrength
- 		: 7500;
- 	const moveInterval = this.props.moveInterval
- 		? this.props.moveInterval
- 		: 100;
- 		this.moveInterval = setInterval(() => {
- 		this.setState({
- 			dx: this.state.dx + SVG_WIDTH / windStrength
- 		});
- 	}, moveInterval);
- };
- 	componentWillUnmount = () => {
- 	if (this.moveInterval) {
- 		clearInterval(this.moveInterval);
- 	}
- };*/
 
 }
 
 exports.default = Cloud;
 
 /***/ }),
-/* 40 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2247,7 +2033,7 @@ class Sun extends _react2.default.PureComponent {
 exports.default = Sun;
 
 /***/ }),
-/* 41 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2323,7 +2109,7 @@ class Hills extends _react2.default.PureComponent {
 exports.default = Hills;
 
 /***/ }),
-/* 42 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2390,11 +2176,128 @@ class DropShadowFilter extends _react2.default.PureComponent {
 exports.default = DropShadowFilter;
 
 /***/ }),
-/* 43 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const path = __webpack_require__(4);
-const webpack = __webpack_require__(6);
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _styledComponents = __webpack_require__(3);
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const ModalWrapper = _styledComponents2.default.div`
+	position: fixed;
+	top: 4rem;
+	width: 30rem;
+	left: 50%;
+
+	padding: 1rem;
+	background-color: #fff;
+	border-radius: 0.5rem;
+
+	box-shadow: 1px 1px 0 2px rgba(0, 0, 0, 0.1);
+
+	animation: fade-in-bottom 2.5s ease-in-out forwards;
+
+	& > h1 {
+		margin-top: 0;
+	}
+`;
+
+class Modal extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			return _react2.default.createElement(
+				ModalWrapper,
+				null,
+				this.props.children
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = Modal;
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Logo extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			return _react2.default.createElement(
+				"svg",
+				_extends({}, this.props, { viewBox: "0 0 219 308" }),
+				_react2.default.createElement("polygon", {
+					fill: "#DC6455",
+					points: "35 305 0 85 140 5.68434189e-14 215 155 190 305"
+				}),
+				_react2.default.createElement("circle", { fill: "#F5D76E", cx: "111", cy: "137", r: "27" }),
+				_react2.default.createElement("polygon", { fill: "#F7CA18", points: "0 85 115 135 190 305 35 305" }),
+				_react2.default.createElement("polygon", {
+					fillOpacity: "0.5",
+					fill: "#F27935",
+					points: "140 0 115 135 35 305 190 305 215 155"
+				})
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = Logo;
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+const colorPrimary = exports.colorPrimary = "#dc6455";
+const colorBackground = exports.colorBackground = "#f5f5f5";
+const colorBackgroundOverlay = exports.colorBackgroundOverlay = "#ffffff";
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const path = __webpack_require__(5);
+const webpack = __webpack_require__(7);
 
 process.traceDeprecation = true; //https://github.com/webpack/loader-utils/issues/56
 
@@ -2459,19 +2362,6 @@ module.exports = {
 							],
 							plugins: [
 								"relay",
-								[
-									"react-css-modules",
-									{
-										context,
-										webpackHotModuleReloading: true,
-										handleMissingStyleName: "warn",
-										filetypes: {
-											".scss": {
-												syntax: "postcss-scss"
-											}
-										}
-									}
-								],
 								"transform-object-rest-spread",
 								"transform-class-properties"
 							]
@@ -2520,13 +2410,13 @@ module.exports = {
 
 
 /***/ }),
-/* 44 */
+/* 40 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-dev-middleware");
 
 /***/ }),
-/* 45 */
+/* 41 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-hot-middleware");

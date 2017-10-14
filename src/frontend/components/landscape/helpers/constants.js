@@ -44,8 +44,8 @@ export const SKY_WIDTH = SVG_WIDTH;
 export const SKY_HEIGHT = SVG_HEIGHT / 2;
 export const SKY_CLOUD_COUNT = 2;
 
-export const MIN_WIND_STRENGTH = 2;
-export const MAX_WIND_STRENGTH = 5;
+export const MIN_WIND_STRENGTH = 1;
+export const MAX_WIND_STRENGTH = 2;
 
 export const CLOUD_MOVE_INTERVAL = 25;
 

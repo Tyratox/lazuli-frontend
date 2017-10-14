@@ -59,19 +59,6 @@ module.exports = {
 							],
 							plugins: [
 								"relay",
-								[
-									"react-css-modules",
-									{
-										context,
-										webpackHotModuleReloading: true,
-										handleMissingStyleName: "warn",
-										filetypes: {
-											".scss": {
-												syntax: "postcss-scss"
-											}
-										}
-									}
-								],
 								"transform-object-rest-spread",
 								"transform-class-properties"
 							]
