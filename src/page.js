@@ -30,8 +30,8 @@ module.exports = request => {
 								name="viewport"
 								content="width=device-width, initial-scale=1.0"
 							/>
-							<link href="/assets/styles/fonts.css" rel="stylesheet" />
 							<link href="/assets/styles/normalize.css" rel="stylesheet" />
+							<link href="/assets/styles/fonts.css" rel="stylesheet" />
 
 							{/* kinda hacky */}
 							<meta name="css-placeholder" />

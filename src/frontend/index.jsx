@@ -4,13 +4,12 @@ import ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
 import Router from "universal-router";
-import createHistory from "history/createBrowserHistory";
+import history from "./history";
 
 import Api from "./Api";
 import routes from "./routes";
 
 const router = new Router(routes);
-const history = createHistory();
 
 const context = {
 	api: Api.create({

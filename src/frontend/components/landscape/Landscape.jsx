@@ -52,7 +52,7 @@ class Landscape extends React.PureComponent {
 		}
 
 		if (this.animate) {
-			window.requestAnimationFrame(this.animateSun);
+			this.animationFrameId = window.requestAnimationFrame(this.animateSun);
 		} else {
 			this.setState({ overrideSunX: undefined, overrideSunY: undefined });
 		}
@@ -73,7 +73,7 @@ class Landscape extends React.PureComponent {
 			) {
 				this.animate = true;
 				this.totalAnimationTimePassed = 0;
-				window.requestAnimationFrame(this.animateSun);
+				this.animationFrameId = window.requestAnimationFrame(this.animateSun);
 			}
 
 			this.setState({ hours });
@@ -82,6 +82,13 @@ class Landscape extends React.PureComponent {
 
 	componentWillUnmount = () => {
 		this.animate = false;
+
+		if (this.animationFrameId) {
+			window.cancelAnimationFrame(this.animationFrameId);
+		}
+		if (this.updateInterval) {
+			clearInterval(this.updateInterval);
+		}
 	};
 
 	render() {

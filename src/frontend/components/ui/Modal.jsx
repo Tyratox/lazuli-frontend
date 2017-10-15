@@ -24,7 +24,7 @@ const ModalWrapper = styled.div`
 
 	box-shadow: 1px 1px 0 2px rgba(0, 0, 0, 0.1);
 
-	animation: ${fadeIn} 2.5s ease-in-out forwards;
+	animation: ${fadeIn} 2s ease-in-out forwards;
 
 	& > h1 {
 		margin-top: 0;

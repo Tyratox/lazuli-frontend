@@ -69,21 +69,24 @@ class Sky extends React.PureComponent {
 			});
 
 			this.setState({ clouds }, this.checkClouds);
-
 			this.lastMovedClouds = now;
 		}
 
 		if (this.animate) {
-			window.requestAnimationFrame(this.moveClouds);
+			this.animationFrameId = window.requestAnimationFrame(this.moveClouds);
 		}
 	};
 	componentDidMount = () => {
 		this.animate = true;
-		window.requestAnimationFrame(this.moveClouds);
+		this.animationFrameId = window.requestAnimationFrame(this.moveClouds);
 	};
 
 	componentWillUnmount = () => {
 		this.animate = false;
+
+		if (this.animationFrameId) {
+			window.cancelAnimationFrame(this.animationFrameId);
+		}
 	};
 	render = () => {
 		const { hours = 0, day = true, sunX = 50, sunY = 45 } = this.props;
