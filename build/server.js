@@ -870,14 +870,14 @@ expressServer.get("/oauth-callback", (request, response) => {
 
 if (process.env.NODE_ENV === "development") {
 	const webpack = __webpack_require__(11);
-	const webpackConfig = __webpack_require__(48);
+	const webpackConfig = __webpack_require__(49);
 	const compiler = webpack(webpackConfig);
 
-	expressServer.use(__webpack_require__(49)(compiler, {
+	expressServer.use(__webpack_require__(50)(compiler, {
 		publicPath: webpackConfig.output.publicPath
 	}));
 
-	expressServer.use(__webpack_require__(50)(compiler));
+	expressServer.use(__webpack_require__(51)(compiler));
 
 	expressServer.get("*", (request, response) => {
 		return renderSite(request, response);
@@ -2737,29 +2737,106 @@ var _Sidebar = __webpack_require__(10);
 
 var _Sidebar2 = _interopRequireDefault(_Sidebar);
 
+var _ArcClock = __webpack_require__(48);
+
+var _ArcClock2 = _interopRequireDefault(_ArcClock);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const Wrapper = _styledComponents2.default.div`
+	padding: 1rem;
 	width: 100%;
 	height: 100%;
 	background-color: ${_constants.colorBackground};
 `;
 
-class Dashboard extends _react2.default.PureComponent {
-	constructor(...args) {
-		var _temp;
+const Card = _styledComponents2.default.div`
+	padding: 1rem;
+	background-color: #fff;
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
 
-		return _temp = super(...args), this.render = () => {
+	display: inline-block;
+`;
+
+const CenterTime = _styledComponents2.default.div`
+	position: relative;
+	top: 50%;
+	left: 0;
+	right: 0;
+
+	text-align: center;
+
+	transform: translateY(-50%);
+`;
+
+const padd = t => t < 10 ? "0" + t : t;
+
+const Time = ({ date }) => {
+	const hours = date.getHours(),
+	      minutes = date.getMinutes(),
+	      seconds = date.getSeconds();
+	return _react2.default.createElement(
+		CenterTime,
+		null,
+		padd(hours) + ":" + padd(minutes) + ":" + padd(seconds)
+	);
+};
+
+class Dashboard extends _react2.default.PureComponent {
+	constructor() {
+		super();
+
+		this.updateDate = () => {
+			if (Date.now() - this.lastUpdate >= 1000 / 20) {
+				this.setState({ date: new Date() });
+				this.lastUpdate = Date.now();
+			}
+
+			this.animationFrame = requestAnimationFrame(this.updateDate);
+		};
+
+		this.componentDidMount = () => {
+			this.lastUpdate = 0;
+			this.animationFrame = requestAnimationFrame(this.updateDate);
+		};
+
+		this.componentWillUnmount = () => {
+			if (this.timeInterval) {
+				cancelAnimationFrame(this.animationFrame);
+			}
+		};
+
+		this.render = () => {
+			const { date } = this.state;
+
+			const seconds = date.getSeconds() / 60 + date.getMilliseconds() / 60000;
+			const minutes = date.getMinutes() / 60 + seconds / 60;
+			const hours = date.getHours() / 24 + minutes / 60;
+
 			return _react2.default.createElement(
 				Wrapper,
 				null,
 				_react2.default.createElement(
-					"div",
+					Card,
 					null,
-					"13:06:41"
+					_react2.default.createElement(
+						_ArcClock2.default,
+						{ width: "200px", progress: hours, innerWidth: 0.9 },
+						_react2.default.createElement(
+							_ArcClock2.default,
+							{ width: 0.9, progress: minutes, innerWidth: 0.6 },
+							_react2.default.createElement(
+								_ArcClock2.default,
+								{ width: 0.9, progress: seconds, innerWidth: 0.8 },
+								_react2.default.createElement(Time, { date: date })
+							)
+						)
+					)
 				)
 			);
-		}, _temp;
+		};
+
+		this.state = { date: new Date() };
 	}
 
 }
@@ -2768,6 +2845,157 @@ exports.default = Dashboard;
 
 /***/ }),
 /* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _styledComponents = __webpack_require__(3);
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _constants = __webpack_require__(4);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*const rotate = keyframes`
+	0%   { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+`;
+
+const fill = keyframes`
+	0%        { opacity: 0; }
+	50%, 100% { opacity: 1; }
+`;
+
+const mask = keyframes`
+	0%        { opacity: 1; }
+	50%, 100% { opacity: 0; }
+`;*/
+
+const Circle = _styledComponents2.default.div`
+	width: 100%;
+	border-radius: 50%;
+
+	&:after {
+		content: "";
+		display: block;
+		padding-bottom: 100%;
+	}
+`;
+
+const ClockCircleEmpty = Circle.extend`
+	position: relative;
+	overflow: hidden;
+	clip-path: circle(100% at 50% 50%);
+	background-color: ${_constants.colorBackground};
+`;
+const ClockCircleColor = _styledComponents2.default.div`
+	position: absolute;
+	left: 0;
+
+	height: 100%;
+	width: 50%;
+	background-color: ${_constants.colorPrimary};
+
+	transform-origin: 100% 50%;
+`;
+const ClockCircleColorMask = _styledComponents2.default.div`
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 50%;
+	height: 100%;
+	background-color: ${_constants.colorBackground};
+`;
+const ClockCircleColorFiller = _styledComponents2.default.div`
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 50%;
+	height: 100%;
+
+	background-color: ${_constants.colorPrimary};
+`;
+
+const ClockCircleCover = Circle.extend`
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+
+	width: ${props => props.width * 100 + "%"};
+	background-color: #fff;
+
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
+`;
+
+const ClockCircleCoverContent = _styledComponents2.default.div`
+	position: absolute;
+
+	width: 100%;
+	height: 100%;
+`;
+
+const ClockWrapper = _styledComponents2.default.div`
+	position: relative;
+	width: ${props => isNaN(props.width) ? props.width : props.width * 100 + "%"};
+	top: ${props => (isNaN(props.width) ? "auto" : (1 - props.width) / 2) * 100 + "%"};
+	left: ${props => (isNaN(props.width) ? "auto" : (1 - props.width) / 2) * 100 + "%"};
+`;
+
+class ClockCircle extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			const { children, progress = 0, width, innerWidth } = this.props;
+
+			return _react2.default.createElement(
+				ClockWrapper,
+				{ width: width },
+				_react2.default.createElement(
+					ClockCircleEmpty,
+					null,
+					_react2.default.createElement(ClockCircleColor, {
+						style: {
+							transform: `rotate(${progress * 360 + "deg"})`
+						}
+					}),
+					_react2.default.createElement(ClockCircleColorMask, {
+						style: { opacity: progress < 0.5 ? "1" : "0" }
+					}),
+					_react2.default.createElement(ClockCircleColorFiller, {
+						style: { opacity: progress > 0.5 ? "1" : "0" }
+					}),
+					_react2.default.createElement(
+						ClockCircleCover,
+						{ width: innerWidth },
+						_react2.default.createElement(
+							ClockCircleCoverContent,
+							null,
+							children
+						)
+					)
+				)
+			);
+		}, _temp;
+	}
+
+}
+
+exports.default = ClockCircle;
+
+/***/ }),
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const path = __webpack_require__(6);
@@ -2884,13 +3112,13 @@ module.exports = {
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-dev-middleware");
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-hot-middleware");

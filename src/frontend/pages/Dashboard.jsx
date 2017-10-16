@@ -5,18 +5,27 @@ import { colorPrimary, colorBackground } from "../constants.js";
 
 import Sidebar from "../components/ui/Sidebar";
 import ArcClock from "../components/ui/ArcClock";
+import EarthMap from "../components/ui/EarthMap.jsx";
 
 const Wrapper = styled.div`
 	padding: 1rem;
 	width: 100%;
 	height: 100%;
 	background-color: ${colorBackground};
+
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-around;
+	align-items: flex-start;
+	align-content: flex-start;
 `;
 
 const Card = styled.div`
+	margin: 0.5rem;
 	padding: 1rem;
 	background-color: #fff;
 	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+	border-radius: 0.3rem;
 
 	display: inline-block;
 `;
@@ -88,6 +97,9 @@ class Dashboard extends React.PureComponent {
 							</ArcClock>
 						</ArcClock>
 					</ArcClock>
+				</Card>
+				<Card>
+					<EarthMap />
 				</Card>
 			</Wrapper>
 		);
