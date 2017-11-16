@@ -3,21 +3,6 @@ import styled, { keyframes } from "styled-components";
 
 import { colorPrimary, colorBackground } from "../../constants.js";
 
-/*const rotate = keyframes`
-	0%   { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
-`;
-
-const fill = keyframes`
-	0%        { opacity: 0; }
-	50%, 100% { opacity: 1; }
-`;
-
-const mask = keyframes`
-	0%        { opacity: 1; }
-	50%, 100% { opacity: 0; }
-`;*/
-
 const Circle = styled.div`
 	width: 100%;
 	border-radius: 50%;

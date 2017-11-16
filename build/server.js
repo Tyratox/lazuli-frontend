@@ -708,6 +708,34 @@ const Wrapper = _styledComponents2.default.div`
 	background-color: rgba(255, 255, 255, 0.9);
 `;
 
+const ServerList = _styledComponents2.default.ul`list-style: none;`;
+
+const pulse = _styledComponents.keyframes`
+	0%{
+		opacity: 1;
+	}
+	50%{
+		opacity: 0.5;
+	}
+	100%{
+		opacity: 1;
+	}
+`;
+
+const DotOnline = _styledComponents2.default.div`
+	display: inline-block;
+
+	width: 10px;
+	height: 10px;
+	margin-right: 0.5rem;
+
+	border-radius: 50%;
+	background-color: green;
+
+	animation: ${pulse} 0.75s ease-in-out 0s infinite;
+`;
+const DotOffline = DotOnline.extend`background-color: red;`;
+
 class Sidebar extends _react2.default.PureComponent {
 	constructor() {
 		super();
@@ -739,6 +767,16 @@ class Sidebar extends _react2.default.PureComponent {
 						Title,
 						null,
 						"LAZULI"
+					),
+					_react2.default.createElement(
+						ServerList,
+						null,
+						_react2.default.createElement(
+							"li",
+							null,
+							_react2.default.createElement(DotOnline, null),
+							"server.tyratox.ch | 10ms"
+						)
 					)
 				),
 				this.state.search && _react2.default.createElement(_Search2.default, null)
@@ -870,14 +908,14 @@ expressServer.get("/oauth-callback", (request, response) => {
 
 if (process.env.NODE_ENV === "development") {
 	const webpack = __webpack_require__(11);
-	const webpackConfig = __webpack_require__(49);
+	const webpackConfig = __webpack_require__(51);
 	const compiler = webpack(webpackConfig);
 
-	expressServer.use(__webpack_require__(50)(compiler, {
+	expressServer.use(__webpack_require__(52)(compiler, {
 		publicPath: webpackConfig.output.publicPath
 	}));
 
-	expressServer.use(__webpack_require__(51)(compiler));
+	expressServer.use(__webpack_require__(53)(compiler));
 
 	expressServer.get("*", (request, response) => {
 		return renderSite(request, response);
@@ -2741,6 +2779,10 @@ var _ArcClock = __webpack_require__(48);
 
 var _ArcClock2 = _interopRequireDefault(_ArcClock);
 
+var _EarthMap = __webpack_require__(49);
+
+var _EarthMap2 = _interopRequireDefault(_EarthMap);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const Wrapper = _styledComponents2.default.div`
@@ -2748,12 +2790,20 @@ const Wrapper = _styledComponents2.default.div`
 	width: 100%;
 	height: 100%;
 	background-color: ${_constants.colorBackground};
+
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-around;
+	align-items: flex-start;
+	align-content: flex-start;
 `;
 
 const Card = _styledComponents2.default.div`
+	margin: 0.5rem;
 	padding: 1rem;
 	background-color: #fff;
 	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+	border-radius: 0.3rem;
 
 	display: inline-block;
 `;
@@ -2832,6 +2882,11 @@ class Dashboard extends _react2.default.PureComponent {
 							)
 						)
 					)
+				),
+				_react2.default.createElement(
+					Card,
+					null,
+					_react2.default.createElement(_EarthMap2.default, null)
 				)
 			);
 		};
@@ -2865,21 +2920,6 @@ var _styledComponents2 = _interopRequireDefault(_styledComponents);
 var _constants = __webpack_require__(4);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/*const rotate = keyframes`
-	0%   { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
-`;
-
-const fill = keyframes`
-	0%        { opacity: 0; }
-	50%, 100% { opacity: 1; }
-`;
-
-const mask = keyframes`
-	0%        { opacity: 1; }
-	50%, 100% { opacity: 0; }
-`;*/
 
 const Circle = _styledComponents2.default.div`
 	width: 100%;
@@ -2998,6 +3038,177 @@ exports.default = ClockCircle;
 /* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _styledComponents = __webpack_require__(3);
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _reactSimpleMaps = __webpack_require__(50);
+
+var _constants = __webpack_require__(4);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const Wrapper = _styledComponents2.default.div`
+	min-width: 300px;
+	width: 50vw;
+`;
+
+class GraticuleMap extends _react2.default.PureComponent {
+	constructor() {
+		super();
+
+		this.wheel = e => {
+			e.preventDefault();
+			this.setState({ zoom: Math.max(this.state.zoom - e.deltaY / 100, 1) });
+		};
+
+		this.keyUp = e => {
+			if (e.keyCode === 27 && this.state.focused) {
+				this.setState({ zoom: 1, center: [0, 0] });
+			}
+		};
+
+		this.onMouseOver = () => {
+			this.setState({ focused: true });
+		};
+
+		this.onMouseOut = () => {
+			this.setState({ focused: false });
+		};
+
+		this.componentDidMount = () => {
+			document.addEventListener("keyup", this.keyUp);
+		};
+
+		this.componentWillUnmount = () => {
+			document.removeEventListener("keyup", this.keyUp);
+		};
+
+		this.state = { zoom: 1, center: [0, 0], focused: false };
+	}
+
+	render() {
+		return _react2.default.createElement(
+			Wrapper,
+			{
+				onWheel: this.wheel,
+				onMouseOver: this.onMouseOver,
+				onMouseOut: this.onMouseOut
+			},
+			_react2.default.createElement(
+				_reactSimpleMaps.ComposableMap,
+				{
+					projectionConfig: {
+						scale: 205,
+						rotation: [0, 0, 0]
+					},
+					width: 980,
+					height: 551,
+					style: {
+						width: "100%",
+						height: "auto",
+						backgroundColor: _constants.colorBackground
+					}
+				},
+				_react2.default.createElement(
+					_reactSimpleMaps.ZoomableGroup,
+					{
+						zoom: this.state.zoom,
+						disablePanning: true,
+						center: this.state.center
+					},
+					_react2.default.createElement(
+						_reactSimpleMaps.Geographies,
+						{ geographyUrl: "/assets/maps/world-50m.json" },
+						(geographies, projection) => geographies.map((geography, i) => _react2.default.createElement(_reactSimpleMaps.Geography, {
+							key: i,
+							geography: geography,
+							projection: projection,
+							style: {
+								default: {
+									fill: _constants.colorPrimary,
+									stroke: "#ffffff",
+									strokeWidth: 0.75,
+									outline: "none"
+								},
+								hover: {
+									fill: "#ffffff",
+									stroke: _constants.colorPrimary,
+									strokeWidth: 0.75,
+									outline: "none"
+								},
+								pressed: {
+									fill: "#ffffff",
+									stroke: _constants.colorPrimary,
+									strokeWidth: 0.75,
+									outline: "none"
+								}
+							}
+						}))
+					),
+					_react2.default.createElement(_reactSimpleMaps.Graticule, { stroke: "#dddddd", step: [20, 20] }),
+					_react2.default.createElement(
+						_reactSimpleMaps.Annotation,
+						{
+							dx: -60,
+							dy: -30,
+							subject: [8.015, 47.408],
+							strokeWidth: 1
+						},
+						_react2.default.createElement(
+							"text",
+							null,
+							"server.tyratox.ch"
+						)
+					),
+					_react2.default.createElement(
+						_reactSimpleMaps.Markers,
+						null,
+						_react2.default.createElement(
+							_reactSimpleMaps.Marker,
+							{
+								marker: { coordinates: [8.015, 47.408] },
+								style: {
+									default: { fill: "#000" },
+									hover: { fill: "#999" },
+									pressed: { fill: "#000" }
+								},
+								onClick: () => {
+									this.setState({ zoom: 6, center: [8.015, 47.408] });
+								}
+							},
+							_react2.default.createElement("circle", { cx: 0, cy: 0, r: 4 })
+						)
+					)
+				)
+			)
+		);
+	}
+}
+
+exports.default = GraticuleMap;
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-simple-maps");
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
 const path = __webpack_require__(6);
 const webpack = __webpack_require__(11);
 
@@ -3112,13 +3323,13 @@ module.exports = {
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-dev-middleware");
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-hot-middleware");
