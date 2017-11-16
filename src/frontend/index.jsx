@@ -6,29 +6,21 @@ import { AppContainer } from "react-hot-loader";
 import Router from "universal-router";
 import history from "./history";
 
-import Api from "./Api";
+import environment from "./relay-environment";
 import routes from "./routes";
 
 const router = new Router(routes);
 
-const context = {
-	api: Api.create({
-		headers: accessToken ? { Authorization: "Bearer " + accessToken.token } : {}
-	})
-};
-
 const render = (router, location) => {
-	return router
-		.resolve({ pathname: location.pathname, ...context })
-		.then(result => {
-			ReactDOM.render(
-				<AppContainer>{result.component}</AppContainer>,
-				document.getElementById("root"),
-				() => {
-					document.title = result.title;
-				}
-			);
-		});
+	return router.resolve({ pathname: location.pathname }).then(result => {
+		ReactDOM.render(
+			<AppContainer>{result.component}</AppContainer>,
+			document.getElementById("root"),
+			() => {
+				document.title = result.title;
+			}
+		);
+	});
 };
 
 let unlisten = history.listen(render.bind(undefined, router));
@@ -38,17 +30,6 @@ if (navigator.serviceWorker) {
 	navigator.serviceWorker.register("/service-worker.js", {
 		scope: "/"
 	});
-}
-
-let accessToken = localStorage.getItem("access-token");
-if (accessToken) {
-	accessToken = JSON.parse(accessToken);
-
-	if (accessToken.expires < Date.now()) {
-		//logout
-		localStorage.setItem("access-token", "");
-		accessToken = false;
-	}
 }
 
 //If hot reloading is enabled

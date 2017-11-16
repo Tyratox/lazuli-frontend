@@ -9,17 +9,17 @@ import {
 	commitLocalUpdate
 } from "relay-runtime";
 
-import { API_URL } from "../../config.json";
+import { GRAPHQL_ENDPOINT } from "../../server-config.json";
 
 /**
  * Creates a set of helper methods for working with REST and/or GraphQL APIs.
  */
-const create = ({ baseUrl = API_URL, headers = {} }) => {
+const create = ({ endpoint = GRAPHQL_ENDPOINT, headers = {} }) => {
 	// Default options for the Fetch API
 	// https://developer.mozilla.org/docs/Web/API/Fetch_API/Using_Fetch
 	const defaults = {
-		mode: baseUrl ? "cors" : "same-origin",
-		credentials: baseUrl ? "include" : "same-origin",
+		mode: endpoint.startsWith("/") ? "same-origin" : "cors",
+		credentials: endpoint.startsWith("/") ? "same-origin" : "include",
 		headers: {
 			...headers,
 			Accept: "application/json",
@@ -34,7 +34,7 @@ const create = ({ baseUrl = API_URL, headers = {} }) => {
 			operation,
 			variables /* cacheConfig, uploadables */
 		) =>
-			fetch(`${baseUrl}/graphql`, {
+			fetch(endpoint, {
 				...defaults,
 				method: "POST",
 				body: JSON.stringify({
@@ -67,4 +67,18 @@ const create = ({ baseUrl = API_URL, headers = {} }) => {
 	};
 };
 
-export default { create };
+let accessToken = localStorage.getItem("access-token");
+
+if (accessToken) {
+	accessToken = JSON.parse(accessToken);
+
+	if (accessToken.expires < Date.now()) {
+		//logout
+		localStorage.setItem("access-token", "");
+		accessToken = false;
+	}
+}
+
+export default create({
+	headers: accessToken ? { Authorization: "Bearer " + accessToken.token } : {}
+});

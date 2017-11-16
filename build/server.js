@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 12);
+/******/ 	return __webpack_require__(__webpack_require__.s = 11);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -621,16 +621,10 @@ module.exports = require("path");
 /* 7 */
 /***/ (function(module, exports) {
 
-module.exports = {"KEY_PATH":"./keys/server.key","CERT_PATH":"./keys/server.crt","HTTP_PORT":8080,"API_URL":"","CLIENT_ID":1,"CLIENT_SECRET":""}
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports) {
-
 module.exports = require("grid-styled");
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -668,7 +662,7 @@ const Input = _styledComponents2.default.input`
 exports.default = Input;
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -686,7 +680,7 @@ var _styledComponents = __webpack_require__(3);
 
 var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
-var _Search = __webpack_require__(46);
+var _Search = __webpack_require__(42);
 
 var _Search2 = _interopRequireDefault(_Search);
 
@@ -708,40 +702,12 @@ const Wrapper = _styledComponents2.default.div`
 	background-color: rgba(255, 255, 255, 0.9);
 `;
 
-const ServerList = _styledComponents2.default.ul`list-style: none;`;
-
-const pulse = _styledComponents.keyframes`
-	0%{
-		opacity: 1;
-	}
-	50%{
-		opacity: 0.5;
-	}
-	100%{
-		opacity: 1;
-	}
-`;
-
-const DotOnline = _styledComponents2.default.div`
-	display: inline-block;
-
-	width: 10px;
-	height: 10px;
-	margin-right: 0.5rem;
-
-	border-radius: 50%;
-	background-color: green;
-
-	animation: ${pulse} 0.75s ease-in-out 0s infinite;
-`;
-const DotOffline = DotOnline.extend`background-color: red;`;
-
 class Sidebar extends _react2.default.PureComponent {
 	constructor() {
 		super();
 
 		this.onKeydown = e => {
-			if (e.keyCode === 32 && e.ctrlKey) {
+			if (e.keyCode === 32 && e.shiftKey) {
 				this.setState({ search: !this.state.search });
 			} else if (e.keyCode === 27 && this.state.search) {
 				this.setState({ search: false });
@@ -767,16 +733,6 @@ class Sidebar extends _react2.default.PureComponent {
 						Title,
 						null,
 						"LAZULI"
-					),
-					_react2.default.createElement(
-						ServerList,
-						null,
-						_react2.default.createElement(
-							"li",
-							null,
-							_react2.default.createElement(DotOnline, null),
-							"server.tyratox.ch | 10ms"
-						)
 					)
 				),
 				this.state.search && _react2.default.createElement(_Search2.default, null)
@@ -790,32 +746,32 @@ class Sidebar extends _react2.default.PureComponent {
 exports.default = Sidebar;
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack");
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(13);
+module.exports = __webpack_require__(12);
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const http2 = __webpack_require__(14);
-const express = __webpack_require__(15);
-const compression = __webpack_require__(16);
-const promiseRequest = __webpack_require__(17);
+const http2 = __webpack_require__(13);
+const express = __webpack_require__(14);
+const compression = __webpack_require__(15);
+const promiseRequest = __webpack_require__(16);
 
 const path = __webpack_require__(6);
-const fs = __webpack_require__(18);
+const fs = __webpack_require__(17);
 
 const {
 	KEY_PATH,
@@ -824,7 +780,7 @@ const {
 	API_URL,
 	CLIENT_ID,
 	CLIENT_SECRET
-} = __webpack_require__(7);
+} = __webpack_require__(18);
 const page = __webpack_require__(19);
 
 const expressServer = express();
@@ -907,15 +863,15 @@ expressServer.get("/oauth-callback", (request, response) => {
 });
 
 if (process.env.NODE_ENV === "development") {
-	const webpack = __webpack_require__(11);
-	const webpackConfig = __webpack_require__(51);
+	const webpack = __webpack_require__(10);
+	const webpackConfig = __webpack_require__(47);
 	const compiler = webpack(webpackConfig);
 
-	expressServer.use(__webpack_require__(52)(compiler, {
+	expressServer.use(__webpack_require__(48)(compiler, {
 		publicPath: webpackConfig.output.publicPath
 	}));
 
-	expressServer.use(__webpack_require__(53)(compiler));
+	expressServer.use(__webpack_require__(49)(compiler));
 
 	expressServer.get("*", (request, response) => {
 		return renderSite(request, response);
@@ -956,34 +912,40 @@ if (process.env.NODE_ENV === "development") {
 }
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports) {
 
 module.exports = require("spdy");
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports) {
 
 module.exports = require("compression");
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = require("request-promise-native");
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+module.exports = {"KEY_PATH":"./keys/server.key","CERT_PATH":"./keys/server.crt","HTTP_PORT":8080,"API_URL":"","CLIENT_ID":1,"CLIENT_SECRET":""}
 
 /***/ }),
 /* 19 */
@@ -1006,11 +968,7 @@ var _universalRouter = __webpack_require__(21);
 
 var _universalRouter2 = _interopRequireDefault(_universalRouter);
 
-var _Api = __webpack_require__(22);
-
-var _Api2 = _interopRequireDefault(_Api);
-
-var _routes = __webpack_require__(25);
+var _routes = __webpack_require__(22);
 
 var _routes2 = _interopRequireDefault(_routes);
 
@@ -1085,84 +1043,6 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _isomorphicFetch = __webpack_require__(23);
-
-var _isomorphicFetch2 = _interopRequireDefault(_isomorphicFetch);
-
-var _relayRuntime = __webpack_require__(24);
-
-var _config = __webpack_require__(7);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Creates a set of helper methods for working with REST and/or GraphQL APIs.
- */
-const create = ({ baseUrl = _config.API_URL, headers = {} }) => {
-	// Default options for the Fetch API
-	// https://developer.mozilla.org/docs/Web/API/Fetch_API/Using_Fetch
-	const defaults = {
-		mode: baseUrl ? "cors" : "same-origin",
-		credentials: baseUrl ? "include" : "same-origin",
-		headers: _extends({}, headers, {
-			Accept: "application/json",
-			"Content-Type": "application/json"
-		})
-	};
-
-	// Configure Relay environment
-	const environment = new _relayRuntime.Environment({
-		handlerProvider: null,
-		network: _relayRuntime.Network.create((operation, variables /* cacheConfig, uploadables */
-		) => (0, _isomorphicFetch2.default)(`${baseUrl}/graphql`, _extends({}, defaults, {
-			method: "POST",
-			body: JSON.stringify({
-				query: operation.text, // GraphQL text from input
-				variables
-			}),
-			headers: _extends({}, defaults.headers, options && options.headers)
-		})).then(body => body.json())),
-		store: new _relayRuntime.Store(new _relayRuntime.RecordSource())
-	});
-
-	return {
-		environment,
-		fetch: (url, options) => (0, _isomorphicFetch2.default)(`${baseUrl}${url}`, _extends({}, defaults, options, {
-			headers: _extends({}, defaults.headers, options && options.headers)
-		})),
-		fetchQuery: _relayRuntime.fetchQuery.bind(undefined, environment),
-		commitMutation: _relayRuntime.commitMutation.bind(undefined, environment),
-		commitLocalUpdate: _relayRuntime.commitLocalUpdate.bind(undefined, environment)
-	};
-};
-
-exports.default = { create };
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports) {
-
-module.exports = require("isomorphic-fetch");
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports) {
-
-module.exports = require("relay-runtime");
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
 var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
@@ -1171,17 +1051,17 @@ var _styledComponents = __webpack_require__(3);
 
 var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
-var _gridStyled = __webpack_require__(8);
+var _gridStyled = __webpack_require__(7);
 
-var _Login = __webpack_require__(26);
+var _Login = __webpack_require__(23);
 
 var _Login2 = _interopRequireDefault(_Login);
 
-var _Sidebar = __webpack_require__(10);
+var _Sidebar = __webpack_require__(9);
 
 var _Sidebar2 = _interopRequireDefault(_Sidebar);
 
-var _Dashboard = __webpack_require__(47);
+var _Dashboard = __webpack_require__(43);
 
 var _Dashboard2 = _interopRequireDefault(_Dashboard);
 
@@ -1243,7 +1123,7 @@ exports.default = [{
 }];
 
 /***/ }),
-/* 26 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1261,37 +1141,35 @@ var _styledComponents = __webpack_require__(3);
 
 var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
-var _gridStyled = __webpack_require__(8);
+var _gridStyled = __webpack_require__(7);
 
-var _Landscape = __webpack_require__(27);
+var _Landscape = __webpack_require__(24);
 
 var _Landscape2 = _interopRequireDefault(_Landscape);
 
-var _Modal = __webpack_require__(40);
+var _Modal = __webpack_require__(37);
 
 var _Modal2 = _interopRequireDefault(_Modal);
 
-var _Input = __webpack_require__(9);
+var _Input = __webpack_require__(8);
 
 var _Input2 = _interopRequireDefault(_Input);
 
-var _Label = __webpack_require__(41);
+var _Label = __webpack_require__(38);
 
 var _Label2 = _interopRequireDefault(_Label);
 
-var _Button = __webpack_require__(42);
+var _Button = __webpack_require__(39);
 
 var _Button2 = _interopRequireDefault(_Button);
 
-var _logo = __webpack_require__(43);
+var _logo = __webpack_require__(40);
 
 var _logo2 = _interopRequireDefault(_logo);
 
 var _constants = __webpack_require__(4);
 
-var _history = __webpack_require__(44);
-
-var _history2 = _interopRequireDefault(_history);
+var _serverConfig = __webpack_require__(41);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1306,65 +1184,137 @@ const CenteredLogo = (0, _styledComponents2.default)(_logo2.default)`
 	transform: translateY(-50%);
 `;
 
-const Login = () => {
-	return _react2.default.createElement(
-		"div",
-		null,
-		_react2.default.createElement(_Landscape2.default, null),
-		_react2.default.createElement(
-			_Modal2.default,
-			null,
-			_react2.default.createElement(
-				_gridStyled.Flex,
+const LoginForm = _styledComponents2.default.div``;
+
+const RegistrationForm = _styledComponents2.default.div`
+	display: none;
+	&:target {
+		display: block;
+	}
+	&:target ~ #login {
+		display: none;
+	}
+`;
+
+class Login extends _react2.default.PureComponent {
+	constructor(...args) {
+		var _temp;
+
+		return _temp = super(...args), this.render = () => {
+			console.log("render!");
+			return _react2.default.createElement(
+				"div",
 				null,
+				_react2.default.createElement(_Landscape2.default, null),
 				_react2.default.createElement(
-					_gridStyled.Box,
-					{ width: 1 / 4 },
-					_react2.default.createElement(CenteredLogo, null)
-				),
-				_react2.default.createElement(
-					_gridStyled.Box,
-					{ width: 3 / 4, ml: "2rem" },
+					_Modal2.default,
+					null,
 					_react2.default.createElement(
-						"form",
-						{
-							action: "https://x.y/",
-							method: "POST",
-							onSubmit: e => {
-								e.preventDefault();
-								e.stopPropagation();
-								_history2.default.push("/dashboard");
-							}
-						},
+						_gridStyled.Flex,
+						null,
 						_react2.default.createElement(
-							Title,
-							null,
-							"LAZULI"
+							_gridStyled.Box,
+							{ width: 1 / 4 },
+							_react2.default.createElement(CenteredLogo, null)
 						),
 						_react2.default.createElement(
-							_Label2.default,
-							null,
-							"Username"
-						),
-						_react2.default.createElement(_Input2.default, { placeholder: "Nico" }),
-						_react2.default.createElement(
-							_Label2.default,
-							null,
-							"Password"
-						),
-						_react2.default.createElement(_Input2.default, { placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022", type: "password" }),
-						_react2.default.createElement(_Button2.default, { type: "submit", value: "Login" })
+							_gridStyled.Box,
+							{ width: 3 / 4, ml: "2rem" },
+							_react2.default.createElement(
+								RegistrationForm,
+								{ id: "registration" },
+								_react2.default.createElement(
+									"form",
+									{ action: _serverConfig.API_URL + "/auth/login", method: "POST" },
+									_react2.default.createElement(
+										Title,
+										null,
+										"LAZULI"
+									),
+									_react2.default.createElement(
+										_Label2.default,
+										null,
+										"First name"
+									),
+									_react2.default.createElement(_Input2.default, { type: "text", name: "nameFirst", placeholder: "Nico" }),
+									_react2.default.createElement(
+										_Label2.default,
+										null,
+										"E-Mail"
+									),
+									_react2.default.createElement(_Input2.default, {
+										type: "email",
+										name: "email",
+										placeholder: "me@tyratox.ch"
+									}),
+									_react2.default.createElement(
+										_Button2.default,
+										{ type: "submit" },
+										"Register"
+									)
+								),
+								_react2.default.createElement(
+									"a",
+									{ href: "#" },
+									"Already registered?"
+								)
+							),
+							_react2.default.createElement(
+								LoginForm,
+								{ id: "login" },
+								_react2.default.createElement(
+									"form",
+									{ action: _serverConfig.API_URL + "/auth/login", method: "POST" },
+									_react2.default.createElement(
+										Title,
+										null,
+										"LAZULI"
+									),
+									_react2.default.createElement(
+										_Label2.default,
+										null,
+										"E-Mail"
+									),
+									_react2.default.createElement(_Input2.default, {
+										type: "email",
+										placeholder: "me@tyratox.ch",
+										name: "email"
+									}),
+									_react2.default.createElement(
+										_Label2.default,
+										null,
+										"Password"
+									),
+									_react2.default.createElement(_Input2.default, {
+										type: "password",
+										name: "password",
+										placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
+									}),
+									_react2.default.createElement(
+										_Button2.default,
+										{ type: "submit" },
+										"Login"
+									)
+								),
+								_react2.default.createElement(
+									"a",
+									{ href: "#registration" },
+									"Not registered yet?"
+								)
+							)
+						)
 					)
 				)
-			)
-		)
-	);
-};
+			);
+		}, _temp;
+	}
+
+}
 
 exports.default = Login;
 
 /***/ }),
-/* 27 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1378,27 +1328,27 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Clock = __webpack_require__(28);
+var _Clock = __webpack_require__(25);
 
 var _Clock2 = _interopRequireDefault(_Clock);
 
-var _Ground = __webpack_require__(29);
+var _Ground = __webpack_require__(26);
 
 var _Ground2 = _interopRequireDefault(_Ground);
 
-var _Sky = __webpack_require__(35);
+var _Sky = __webpack_require__(32);
 
 var _Sky2 = _interopRequireDefault(_Sky);
 
-var _Sun = __webpack_require__(37);
+var _Sun = __webpack_require__(34);
 
 var _Sun2 = _interopRequireDefault(_Sun);
 
-var _Hills = __webpack_require__(38);
+var _Hills = __webpack_require__(35);
 
 var _Hills2 = _interopRequireDefault(_Hills);
 
-var _DropShadowFilter = __webpack_require__(39);
+var _DropShadowFilter = __webpack_require__(36);
 
 var _DropShadowFilter2 = _interopRequireDefault(_DropShadowFilter);
 
@@ -1512,7 +1462,7 @@ var _initialiseProps = function () {
 exports.default = Landscape;
 
 /***/ }),
-/* 28 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1637,7 +1587,7 @@ class Clock extends _react2.default.PureComponent {
 exports.default = Clock;
 
 /***/ }),
-/* 29 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1655,11 +1605,11 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _River = __webpack_require__(30);
+var _River = __webpack_require__(27);
 
 var _River2 = _interopRequireDefault(_River);
 
-var _GroundDecoration = __webpack_require__(31);
+var _GroundDecoration = __webpack_require__(28);
 
 var _GroundDecoration2 = _interopRequireDefault(_GroundDecoration);
 
@@ -1715,7 +1665,7 @@ class Ground extends _react2.default.PureComponent {
 exports.default = Ground;
 
 /***/ }),
-/* 30 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1762,7 +1712,7 @@ class River extends _react2.default.PureComponent {
 exports.default = River;
 
 /***/ }),
-/* 31 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1780,15 +1730,15 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _Angular = __webpack_require__(32);
+var _Angular = __webpack_require__(29);
 
 var _Angular2 = _interopRequireDefault(_Angular);
 
-var _Fir = __webpack_require__(33);
+var _Fir = __webpack_require__(30);
 
 var _Fir2 = _interopRequireDefault(_Fir);
 
-var _Oval = __webpack_require__(34);
+var _Oval = __webpack_require__(31);
 
 var _Oval2 = _interopRequireDefault(_Oval);
 
@@ -1831,7 +1781,7 @@ class GroundDecoration extends _react2.default.PureComponent {
 exports.default = GroundDecoration;
 
 /***/ }),
-/* 32 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1900,7 +1850,7 @@ class AngularTree extends _react2.default.PureComponent {
 exports.default = AngularTree;
 
 /***/ }),
-/* 33 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1969,7 +1919,7 @@ class OvalTree extends _react2.default.PureComponent {
 exports.default = OvalTree;
 
 /***/ }),
-/* 34 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2038,7 +1988,7 @@ class OvalTree extends _react2.default.PureComponent {
 exports.default = OvalTree;
 
 /***/ }),
-/* 35 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2058,7 +2008,7 @@ var _utilities = __webpack_require__(1);
 
 var _constants = __webpack_require__(2);
 
-var _DefaultCloud = __webpack_require__(36);
+var _DefaultCloud = __webpack_require__(33);
 
 var _DefaultCloud2 = _interopRequireDefault(_DefaultCloud);
 
@@ -2182,7 +2132,7 @@ class Sky extends _react2.default.PureComponent {
 exports.default = Sky;
 
 /***/ }),
-/* 36 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2229,7 +2179,7 @@ class Cloud extends _react2.default.PureComponent {
 exports.default = Cloud;
 
 /***/ }),
-/* 37 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2334,7 +2284,7 @@ class Sun extends _react2.default.PureComponent {
 exports.default = Sun;
 
 /***/ }),
-/* 38 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2410,7 +2360,7 @@ class Hills extends _react2.default.PureComponent {
 exports.default = Hills;
 
 /***/ }),
-/* 39 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2477,7 +2427,7 @@ class DropShadowFilter extends _react2.default.PureComponent {
 exports.default = DropShadowFilter;
 
 /***/ }),
-/* 40 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2545,7 +2495,7 @@ class Modal extends _react2.default.PureComponent {
 exports.default = Modal;
 
 /***/ }),
-/* 41 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2573,7 +2523,7 @@ const Label = _styledComponents2.default.label`
 exports.default = Label;
 
 /***/ }),
-/* 42 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2595,7 +2545,7 @@ var _constants = __webpack_require__(4);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const Button = _styledComponents2.default.input`
+const Button = _styledComponents2.default.button`
 	font-size: 1rem;
 	margin-top: 1rem;
 	padding: 0.5rem 1rem;
@@ -2609,7 +2559,7 @@ const Button = _styledComponents2.default.input`
 exports.default = Button;
 
 /***/ }),
-/* 43 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2655,34 +2605,13 @@ class Logo extends _react2.default.PureComponent {
 exports.default = Logo;
 
 /***/ }),
-/* 44 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createBrowserHistory = __webpack_require__(45);
-
-var _createBrowserHistory2 = _interopRequireDefault(_createBrowserHistory);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const history = typeof window !== "undefined" ? (0, _createBrowserHistory2.default)() : {};
-
-exports.default = history;
-
-/***/ }),
-/* 45 */
+/* 41 */
 /***/ (function(module, exports) {
 
-module.exports = require("history/createBrowserHistory");
+module.exports = {"API_URL":"http://localhost:8100","GRAPHQL_ENDPOINT":"http://localhost:8100/graphql"}
 
 /***/ }),
-/* 46 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2702,7 +2631,7 @@ var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
 var _constants = __webpack_require__(4);
 
-var _Input = __webpack_require__(9);
+var _Input = __webpack_require__(8);
 
 var _Input2 = _interopRequireDefault(_Input);
 
@@ -2751,7 +2680,7 @@ class Search extends _react2.default.PureComponent {
 exports.default = Search;
 
 /***/ }),
-/* 47 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2771,15 +2700,15 @@ var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
 var _constants = __webpack_require__(4);
 
-var _Sidebar = __webpack_require__(10);
+var _Sidebar = __webpack_require__(9);
 
 var _Sidebar2 = _interopRequireDefault(_Sidebar);
 
-var _ArcClock = __webpack_require__(48);
+var _ArcClock = __webpack_require__(44);
 
 var _ArcClock2 = _interopRequireDefault(_ArcClock);
 
-var _EarthMap = __webpack_require__(49);
+var _EarthMap = __webpack_require__(45);
 
 var _EarthMap2 = _interopRequireDefault(_EarthMap);
 
@@ -2899,7 +2828,7 @@ class Dashboard extends _react2.default.PureComponent {
 exports.default = Dashboard;
 
 /***/ }),
-/* 48 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3035,7 +2964,7 @@ class ClockCircle extends _react2.default.PureComponent {
 exports.default = ClockCircle;
 
 /***/ }),
-/* 49 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3053,7 +2982,7 @@ var _styledComponents = __webpack_require__(3);
 
 var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
-var _reactSimpleMaps = __webpack_require__(50);
+var _reactSimpleMaps = __webpack_require__(46);
 
 var _constants = __webpack_require__(4);
 
@@ -3200,17 +3129,17 @@ class GraticuleMap extends _react2.default.PureComponent {
 exports.default = GraticuleMap;
 
 /***/ }),
-/* 50 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = require("react-simple-maps");
 
 /***/ }),
-/* 51 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const path = __webpack_require__(6);
-const webpack = __webpack_require__(11);
+const webpack = __webpack_require__(10);
 
 process.traceDeprecation = true; //https://github.com/webpack/loader-utils/issues/56
 
@@ -3323,13 +3252,13 @@ module.exports = {
 
 
 /***/ }),
-/* 52 */
+/* 48 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-dev-middleware");
 
 /***/ }),
-/* 53 */
+/* 49 */
 /***/ (function(module, exports) {
 
 module.exports = require("webpack-hot-middleware");

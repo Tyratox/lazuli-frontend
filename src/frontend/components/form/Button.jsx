@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { colorPrimary } from "../../constants";
 
-const Button = styled.input`
+const Button = styled.button`
 	font-size: 1rem;
 	margin-top: 1rem;
 	padding: 0.5rem 1rem;

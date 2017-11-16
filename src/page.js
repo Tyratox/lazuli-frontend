@@ -4,7 +4,6 @@ import { ServerStyleSheet } from "styled-components";
 
 import Router from "universal-router";
 
-import Api from "./frontend/Api";
 import routes from "./frontend/routes";
 
 const router = new Router(routes);

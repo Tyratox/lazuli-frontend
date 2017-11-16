@@ -25,7 +25,7 @@ class Sidebar extends React.PureComponent {
 		this.state = { search: false };
 	}
 	onKeydown = e => {
-		if (e.keyCode === 32 && e.ctrlKey) {
+		if (e.keyCode === 32 && e.shiftKey) {
 			this.setState({ search: !this.state.search });
 		} else if (e.keyCode === 27 && this.state.search) {
 			this.setState({ search: false });
